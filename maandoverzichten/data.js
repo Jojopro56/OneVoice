@@ -24455,9 +24455,16 @@ window.VOLVO_RUTTEN_DATA = {
   },
   "latestMonth": "2026-11",
   "tipOfTheMonth": {
-    "quote": "Doe alsof het je eigen auto is",
-    "author": "Customer Champion",
-    "body": ""
+    "quote": "Samen zorgen we voor heldere afspraken en zorgeloze service.",
+    "author": "Joey",
+    "body": "Stem meerwerk en kosten altijd vooraf helder af. Geef bij diagnose of extra werkzaamheden vooraf een duidelijke prijsindicatie en licht de factuur bij het ophalen rustig toe. Zo voorkom je verrassingen achteraf en voelt de klant zich eerlijk en transparant geholpen.\n\nHoud de klant actief op de hoogte bij vertraging. Loopt de planning uit door drukte of een defect apparaat, informeer een wachtende klant dan direct over de oorzaak en de nieuwe eindtijd. Dit neemt onzekerheid weg en laat zien dat we de tijd van de klant respecteren.\n\nBorg klantwensen en doe een laatste kwaliteitscheck. Noteer specifieke wensen en klachten scherp op de werkorder en controleer bij afronding altijd de eindcontrole, zoals een goed gesloten motorkap. Zo leveren we de auto in één keer goed en met vertrouwen weer af."
   },
-  "version": "2026-11-13T10:33:24.060Z"
+  "version": "2026-11-13T14:47:31.771Z",
+  "tipsByMonth": {
+    "2026-11": {
+      "quote": "Samen zorgen we voor heldere afspraken en zorgeloze service.",
+      "author": "Joey",
+      "body": "Stem meerwerk en kosten altijd vooraf helder af. Geef bij diagnose of extra werkzaamheden vooraf een duidelijke prijsindicatie en licht de factuur bij het ophalen rustig toe. Zo voorkom je verrassingen achteraf en voelt de klant zich eerlijk en transparant geholpen.\n\nHoud de klant actief op de hoogte bij vertraging. Loopt de planning uit door drukte of een defect apparaat, informeer een wachtende klant dan direct over de oorzaak en de nieuwe eindtijd. Dit neemt onzekerheid weg en laat zien dat we de tijd van de klant respecteren.\n\nBorg klantwensen en doe een laatste kwaliteitscheck. Noteer specifieke wensen en klachten scherp op de werkorder en controleer bij afronding altijd de eindcontrole, zoals een goed gesloten motorkap. Zo leveren we de auto in één keer goed en met vertrouwen weer af."
+    }
+  }
 };
