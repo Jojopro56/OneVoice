@@ -2479,11 +2479,20 @@
 
   <script>
     // ==================== CONFIGURATIE INLOGGEGEVENS ====================
-    // Pas hier eventueel de standaard inloggegevens voor het team aan:
-    const AUTH_CONFIG = {
-      username: "VolvoRutten",
-      password: "Rutten2026"
-    };
+    // Account 1 (Beheer / Volledige toegang incl. Data Uploaden): VolvoRutten / Rutten2026
+    // Account 2 (Directie / Alleen bekijken zonder Data Uploaden): Directie / Directie2026
+    const AUTH_ACCOUNTS = [
+      {
+        username: "VolvoRutten",
+        passwords: ["Rutten2026"],
+        role: "admin"
+      },
+      {
+        username: "Directie",
+        passwords: ["Directie2026"],
+        role: "directie"
+      }
+    ];
 
     const MONTH_NAMES_NL = {
       "01": "Januari", "02": "Februari", "03": "Maart", "04": "April",
@@ -2586,9 +2595,26 @@
     const appContainer = document.getElementById("app-container");
     const loginCardBox = document.getElementById("login-card-box");
 
+    function getCurrentUserRole() {
+      return localStorage.getItem("vr_role") || sessionStorage.getItem("vr_role") || "admin";
+    }
+
+    function applyRolePermissions(role) {
+      const uploadBtn = document.getElementById("open-upload-btn");
+      const uploadModalEl = document.getElementById("upload-modal");
+      if (role === "directie") {
+        if (uploadBtn) uploadBtn.style.display = "none";
+        if (uploadModalEl) uploadModalEl.style.display = "none";
+      } else {
+        if (uploadBtn) uploadBtn.style.display = "";
+      }
+    }
+
     function checkAuth() {
       const isAuthed = localStorage.getItem("vr_auth") === "true" || sessionStorage.getItem("vr_auth") === "true";
       if (isAuthed) {
+        const role = getCurrentUserRole();
+        applyRolePermissions(role);
         loginScreen.style.display = "none";
         appContainer.style.display = "block";
         initDashboard();
@@ -2608,9 +2634,23 @@
       const p = document.getElementById("login-pass").value;
       const remember = document.getElementById("login-remember").checked;
 
-      if (u === AUTH_CONFIG.username.toLowerCase() && p === AUTH_CONFIG.password) {
-        if (remember) localStorage.setItem("vr_auth", "true");
-        else sessionStorage.setItem("vr_auth", "true");
+      const matchedAccount = AUTH_ACCOUNTS.find(
+        acc => acc.username.toLowerCase() === u && acc.passwords.includes(p)
+      );
+
+      if (matchedAccount) {
+        localStorage.removeItem("vr_auth");
+        localStorage.removeItem("vr_role");
+        sessionStorage.removeItem("vr_auth");
+        sessionStorage.removeItem("vr_role");
+
+        if (remember) {
+          localStorage.setItem("vr_auth", "true");
+          localStorage.setItem("vr_role", matchedAccount.role);
+        } else {
+          sessionStorage.setItem("vr_auth", "true");
+          sessionStorage.setItem("vr_role", matchedAccount.role);
+        }
         document.getElementById("login-error").style.display = "none";
         checkAuth();
       } else {
@@ -2625,7 +2665,9 @@
 
     document.getElementById("logout-btn").addEventListener("click", () => {
       localStorage.removeItem("vr_auth");
+      localStorage.removeItem("vr_role");
       sessionStorage.removeItem("vr_auth");
+      sessionStorage.removeItem("vr_role");
       checkAuth();
     });
 
