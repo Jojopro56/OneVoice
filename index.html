@@ -1,0 +1,3627 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#003057" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>VOLVO | Rutten — Customer Champion Dashboard</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <!-- SheetJS voor directe Excel (.xlsx / .xls / .csv) verwerking in de browser -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- Standaard databestand uit de map maandoverzichten/ op GitHub Pages -->
+  <script src="maandoverzichten/data.js"></script>
+  <style>
+    :root {
+      --volvo-navy: #003057;
+      --volvo-navy-deep: #001b33;
+      --volvo-blue: #1c6bba;
+      --rutten-gold: #f5c400;
+      --rutten-gold-soft: rgba(245, 196, 0, 0.22);
+      --apple-bg: #eaeff5;
+      --glass-bg: rgba(255, 255, 255, 0.64);
+      --glass-bg-strong: rgba(255, 255, 255, 0.82);
+      --glass-bg-subtle: rgba(255, 255, 255, 0.50);
+      --glass-border: rgba(255, 255, 255, 0.88);
+      --glass-specular: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+      --glass-shadow:
+        0 18px 42px -8px rgba(0, 32, 64, 0.08),
+        0 4px 14px -2px rgba(0, 32, 64, 0.04),
+        var(--glass-specular);
+      --glass-shadow-hover:
+        0 26px 56px -10px rgba(0, 32, 64, 0.13),
+        0 8px 20px -4px rgba(0, 32, 64, 0.06),
+        inset 0 1.5px 0 0 #ffffff,
+        inset 0 0 0 1px rgba(255, 255, 255, 0.78);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --green: #15803d;
+      --green-bright: #16a34a;
+      --green-bg: rgba(22, 163, 74, 0.13);
+      --amber: #b45309;
+      --amber-bg: rgba(217, 119, 6, 0.15);
+      --red: #b91c1c;
+      --red-bg: rgba(220, 38, 38, 0.13);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-pill: 999px;
+      --spring-ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --bounce-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+      color: var(--text-primary);
+      background-color: var(--apple-bg);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      position: relative;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* ==================== APPLE LIQUID GLASS AMBIENT MESH ==================== */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(0, 48, 87, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 88% 12%, rgba(245, 196, 0, 0.16) 0%, transparent 40%),
+        radial-gradient(circle at 78% 86%, rgba(28, 107, 186, 0.12) 0%, transparent 48%),
+        radial-gradient(circle at 18% 82%, rgba(0, 48, 87, 0.08) 0%, transparent 42%),
+        linear-gradient(145deg, #f5f8fc 0%, #e4ecf5 52%, #edf2f8 100%);
+    }
+
+    .ambient-bg::before,
+    .ambient-bg::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.65;
+      pointer-events: none;
+      will-change: transform;
+      animation: ambientFloat 22s ease-in-out infinite alternate;
+    }
+
+    .ambient-bg::before {
+      width: 540px;
+      height: 540px;
+      top: -120px;
+      left: -100px;
+      background: radial-gradient(circle, rgba(28, 107, 186, 0.22) 0%, rgba(0, 48, 87, 0.06) 70%, transparent 100%);
+    }
+
+    .ambient-bg::after {
+      width: 480px;
+      height: 480px;
+      bottom: -110px;
+      right: -80px;
+      background: radial-gradient(circle, rgba(245, 196, 0, 0.20) 0%, rgba(28, 107, 186, 0.08) 70%, transparent 100%);
+      animation-duration: 28s;
+      animation-direction: alternate-reverse;
+    }
+
+    @keyframes ambientFloat {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(45px, 28px, 0) scale(1.07); }
+      100% { transform: translate3d(-25px, 50px, 0) scale(0.96); }
+    }
+
+    /* ==================== APPLE GLASS SURFACE SYSTEM ==================== */
+    .glass-card {
+      position: relative;
+      background: linear-gradient(155deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.56) 100%);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--glass-shadow);
+      transition:
+        transform 0.36s var(--spring-ease),
+        box-shadow 0.36s var(--spring-ease),
+        border-color 0.3s ease,
+        background 0.3s ease;
+    }
+
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 42%);
+      pointer-events: none;
+      opacity: 0.75;
+      transition: opacity 0.35s ease;
+    }
+
+    @media (hover: hover) {
+      .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--glass-shadow-hover);
+        border-color: rgba(255, 255, 255, 0.96);
+      }
+      .glass-card:hover::before {
+        opacity: 1;
+      }
+    }
+
+    /* Staggered Entrance & Data Switch Animations */
+    @keyframes glassReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(22px) scale(0.985);
+        filter: blur(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    @keyframes pulseRefresh {
+      0% { opacity: 0.55; transform: translateY(6px) scale(0.992); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .animate-in {
+      animation: glassReveal 0.65s var(--spring-ease) both;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    .data-switching {
+      animation: pulseRefresh 0.38s var(--spring-ease) both;
+      animation-delay: calc(var(--delay, 0ms) * 0.45);
+    }
+
+    /* ==================== OFFICIAL VOLVO | RUTTEN LOGO ==================== */
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      text-decoration: none;
+      position: relative;
+      transition: transform 0.28s var(--spring-ease);
+    }
+
+    .brand-logo:hover {
+      transform: scale(1.02);
+    }
+
+    .brand-logo-img {
+      display: block;
+      height: 36px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(0, 32, 64, 0.05));
+    }
+
+    .brand-logo-login {
+      padding: 14px 26px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.96);
+      box-shadow:
+        0 10px 26px rgba(0, 32, 64, 0.06),
+        inset 0 1px 0 #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .brand-logo-login .brand-logo-img {
+      height: 44px;
+    }
+
+    .brand-logo-topbar {
+      padding: 6px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 4px 14px rgba(0, 32, 64, 0.04), inset 0 1px 0 #ffffff;
+      flex-shrink: 0;
+    }
+
+    .brand-logo-topbar .brand-logo-img {
+      height: 32px;
+    }
+
+    .brand-logo-modal {
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 48, 87, 0.08);
+      margin-bottom: 8px;
+      display: inline-flex;
+    }
+
+    .brand-logo-modal .brand-logo-img {
+      height: 24px;
+    }
+
+    /* ==================== LOGIN SCREEN ==================== */
+    #login-screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: opacity 0.35s var(--spring-ease), transform 0.35s var(--spring-ease);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      padding: 42px 36px;
+      text-align: center;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.68) 100%);
+      backdrop-filter: blur(40px) saturate(210%);
+      -webkit-backdrop-filter: blur(40px) saturate(210%);
+      animation: glassReveal 0.7s var(--spring-ease) both;
+    }
+
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    .login-card.shake {
+      animation: shakeError 0.42s ease;
+    }
+
+    .login-subtitle {
+      margin-top: 14px;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .login-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, rgba(0, 48, 87, 0.09), rgba(28, 107, 186, 0.09));
+      border: 1px solid rgba(0, 48, 87, 0.12);
+      color: var(--volvo-navy);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .login-form {
+      margin-top: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      padding-left: 4px;
+    }
+
+    .glass-input, .glass-select, .glass-textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0, 48, 87, 0.14);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: inset 0 1px 2px rgba(0, 32, 64, 0.03);
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, transform 0.18s ease;
+    }
+
+    .glass-input:focus, .glass-select:focus, .glass-textarea:focus {
+      background: #ffffff;
+      border-color: var(--volvo-blue);
+      box-shadow: 0 0 0 4px rgba(28, 107, 186, 0.15), 0 4px 12px rgba(0, 48, 87, 0.05);
+    }
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      padding: 2px 4px;
+    }
+
+    .remember-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #003b6b 0%, var(--volvo-navy) 50%, var(--volvo-navy-deep) 100%);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 24px -4px rgba(0, 48, 87, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      transition: transform 0.22s var(--spring-ease), box-shadow 0.22s var(--spring-ease), filter 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -4px rgba(0, 48, 87, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      filter: brightness(1.05);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .login-error {
+      display: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--red-bg);
+      border: 1px solid rgba(220, 38, 38, 0.22);
+      color: var(--red);
+      font-size: 0.84rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* ==================== MAIN DASHBOARD ==================== */
+    #app-container {
+      display: none;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 18px 22px 56px;
+    }
+
+    /* Sticky Apple Liquid Glass Top Bar */
+    .topbar {
+      position: sticky;
+      top: 12px;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 11px 18px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.80) 0%, rgba(255, 255, 255, 0.62) 100%);
+      backdrop-filter: blur(36px) saturate(210%);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      border-radius: 24px;
+      box-shadow:
+        0 14px 36px -6px rgba(0, 32, 64, 0.09),
+        0 2px 8px rgba(0, 32, 64, 0.04),
+        inset 0 1.5px 0 0 #ffffff;
+      transition: box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    /* Apple Sliding Segmented Control for Vestigingen */
+    .segmented-control {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(0, 48, 87, 0.065);
+      box-shadow: inset 0 1px 3px rgba(0, 32, 64, 0.08), 0 1px 0 rgba(255, 255, 255, 0.8);
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      gap: 2px;
+      overflow-x: auto;
+      max-width: 100%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .segmented-control::-webkit-scrollbar {
+      display: none;
+    }
+
+    .seg-pill-indicator {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 0;
+      width: 0;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.92) 100%);
+      box-shadow:
+        0 3px 10px rgba(0, 32, 64, 0.12),
+        0 1px 2px rgba(0, 32, 64, 0.06),
+        inset 0 1px 0 #ffffff;
+      transition: transform 0.38s var(--spring-ease), width 0.38s var(--spring-ease);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .seg-btn {
+      position: relative;
+      z-index: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 17px;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.25s ease, transform 0.15s ease;
+    }
+
+    .seg-btn:hover {
+      color: var(--volvo-navy);
+    }
+
+    .seg-btn:active {
+      transform: scale(0.96);
+    }
+
+    .seg-btn.active {
+      color: var(--volvo-navy);
+      font-weight: 700;
+    }
+
+    .segmented-control:not(.pill-ready) .seg-btn.active {
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 32, 64, 0.1);
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .month-pill-select {
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 2px 8px rgba(0, 32, 64, 0.05), inset 0 1px 0 #ffffff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--volvo-navy);
+      cursor: pointer;
+      outline: none;
+      transition: all 0.22s var(--spring-ease);
+    }
+
+    .month-pill-select:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(0, 32, 64, 0.09);
+    }
+
+    .icon-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 15px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 2px 8px rgba(0, 32, 64, 0.05), inset 0 1px 0 #ffffff;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.24s var(--spring-ease);
+      white-space: nowrap;
+    }
+
+    .icon-pill-btn:hover {
+      background: #ffffff;
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 16px rgba(0, 32, 64, 0.09), inset 0 1px 0 #ffffff;
+    }
+
+    .icon-pill-btn:active {
+      transform: translateY(0) scale(0.96);
+    }
+
+    .icon-pill-btn.navy {
+      background: linear-gradient(135deg, #003b6b 0%, var(--volvo-navy) 100%);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 6px 16px rgba(0, 48, 87, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .icon-pill-btn.navy:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 8px 20px rgba(0, 48, 87, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .icon-pill-btn.notif-active {
+      background: var(--green-bg);
+      color: var(--green);
+      border-color: rgba(22, 163, 74, 0.28);
+    }
+
+    /* Notification Toast Banner */
+    #update-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 22px;
+      margin-bottom: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(0, 48, 87, 0.94), rgba(0, 29, 54, 0.96));
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      box-shadow: 0 16px 36px rgba(0, 48, 87, 0.28);
+      animation: slideDown 0.45s var(--spring-ease);
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Page Context Header */
+    .context-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+
+    .context-title {
+      font-size: clamp(1.32rem, 2.5vw, 1.72rem);
+      font-weight: 800;
+      letter-spacing: -0.028em;
+      color: var(--text-primary);
+    }
+
+    .context-meta {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    /* ==================== GRID LAYOUTS ==================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .mid-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.35fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    /* Hero OSAT Card (Deep Volvo Navy Liquid Glass) */
+    .osat-hero-card {
+      background:
+        radial-gradient(circle at 90% 10%, rgba(245, 196, 0, 0.22) 0%, transparent 50%),
+        linear-gradient(145deg, rgba(0, 56, 101, 0.94) 0%, rgba(0, 29, 54, 0.97) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow:
+        0 20px 44px -10px rgba(0, 32, 64, 0.34),
+        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.35),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .osat-hero-card::after {
+      content: "";
+      position: absolute;
+      top: -45px;
+      right: -45px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 196, 0, 0.26) 0%, transparent 70%);
+      pointer-events: none;
+      animation: ambientFloat 14s ease-in-out infinite alternate;
+    }
+
+    .card-kicker {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .osat-hero-card .card-kicker {
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    .osat-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .big-metric {
+      font-size: clamp(2.35rem, 3.2vw, 2.95rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+    }
+
+    .delta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: transform 0.25s var(--spring-ease), background 0.25s ease;
+    }
+
+    .delta-up { background: rgba(34, 197, 94, 0.24); color: #86efac; border: 1px solid rgba(134, 239, 172, 0.25); }
+    .delta-down { background: rgba(248, 113, 113, 0.24); color: #fca5a5; border: 1px solid rgba(252, 165, 165, 0.25); }
+    .delta-neutral { background: rgba(255, 255, 255, 0.14); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.14); }
+
+    .delta-light-up { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22, 163, 74, 0.18); }
+    .delta-light-down { background: var(--red-bg); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.18); }
+    .delta-light-neutral { background: rgba(82, 96, 113, 0.09); color: var(--text-secondary); border: 1px solid rgba(82, 96, 113, 0.12); }
+
+    /* Circular SVG Gauge */
+    .ring-wrap {
+      position: relative;
+      width: 78px;
+      height: 78px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 50%;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.18);
+    }
+
+    .ring-wrap svg {
+      transform: rotate(-90deg);
+      width: 78px;
+      height: 78px;
+      overflow: visible;
+    }
+
+    #osat-ring-circle {
+      transition: stroke-dashoffset 1.15s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.4s ease;
+      filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.45));
+    }
+
+    .ring-star {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      color: var(--rutten-gold);
+      filter: drop-shadow(0 2px 6px rgba(245, 196, 0, 0.4));
+      animation: starPulse 3.2s ease-in-out infinite;
+    }
+
+    @keyframes starPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    /* Standard KPI Glass Card */
+    .stat-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .rank-number {
+      font-size: clamp(2.15rem, 3vw, 2.68rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--volvo-navy);
+      line-height: 1.05;
+      margin: 12px 0 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-number span {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* CSA Mini Bars inside Card 4 */
+    .csa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      margin-top: 12px;
+    }
+
+    .csa-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      gap: 6px;
+    }
+
+    .csa-bar-track {
+      width: 100%;
+      height: 9px;
+      border-radius: 99px;
+      background: rgba(0, 48, 87, 0.08);
+      box-shadow: inset 0 1px 2px rgba(0, 32, 64, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .csa-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.95s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .csa-bar-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.38) 50%, transparent 100%);
+      transform: translateX(-100%);
+      animation: barShimmer 2.8s infinite;
+    }
+
+    @keyframes barShimmer {
+      100% { transform: translateX(100%); }
+    }
+
+    /* ==================== CUSTOMER HERO (PST) ==================== */
+    .hero-pst-card {
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-spotlight {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 16px 0 20px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(245, 196, 0, 0.18) 0%, rgba(255, 255, 255, 0.65) 55%, rgba(0, 48, 87, 0.06) 100%);
+      border: 1px solid rgba(245, 196, 0, 0.45);
+      box-shadow: 0 10px 26px -6px rgba(245, 196, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      transition: transform 0.3s var(--spring-ease), box-shadow 0.3s ease;
+    }
+
+    .hero-spotlight-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+      flex: 1 1 220px;
+    }
+
+    .btn-voucher {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(245, 196, 0, 0.65);
+      background: linear-gradient(135deg, #003b6b 0%, var(--volvo-navy) 100%);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow:
+        0 8px 20px -4px rgba(0, 48, 87, 0.28),
+        0 0 0 2px rgba(245, 196, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      transition: transform 0.24s var(--spring-ease), box-shadow 0.24s var(--spring-ease), filter 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-voucher:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow:
+        0 12px 26px -4px rgba(0, 48, 87, 0.36),
+        0 0 0 3px rgba(245, 196, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      filter: brightness(1.07);
+    }
+
+    .btn-voucher:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    /* ==================== CADEAUBON STUDIO MODAL ==================== */
+    .voucher-studio-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .gift-choice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .gift-choice-card {
+      position: relative;
+      padding: 15px 14px;
+      border-radius: 18px;
+      border: 2px solid rgba(0, 48, 87, 0.12);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 4px 12px rgba(0, 32, 64, 0.04), inset 0 1px 0 #ffffff;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.24s var(--spring-ease);
+      user-select: none;
+    }
+
+    .gift-choice-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 48, 87, 0.28);
+      background: #ffffff;
+    }
+
+    .gift-choice-card.selected {
+      border-color: var(--volvo-navy);
+      background: linear-gradient(145deg, rgba(245, 196, 0, 0.14) 0%, #ffffff 70%);
+      box-shadow: 0 10px 24px -6px rgba(0, 48, 87, 0.16), inset 0 1px 0 #ffffff;
+    }
+
+    .gift-choice-check {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0, 48, 87, 0.08);
+      color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+
+    .gift-choice-card.selected .gift-choice-check {
+      background: var(--volvo-navy);
+      color: var(--rutten-gold);
+    }
+
+    .a4-preview-wrap {
+      background: rgba(0, 32, 64, 0.05);
+      border: 1px solid rgba(0, 48, 87, 0.12);
+      border-radius: 20px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #voucher-preview-canvas {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      aspect-ratio: 210 / 297;
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: 0 14px 34px rgba(0, 24, 48, 0.18);
+      display: block;
+    }
+
+    .hero-spotlight:hover {
+      transform: scale(1.01);
+      box-shadow: 0 14px 30px -6px rgba(245, 196, 0, 0.25), inset 0 1px 0 #ffffff;
+    }
+
+    .hero-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--volvo-navy), var(--volvo-blue));
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 10px 20px rgba(0, 48, 87, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      position: relative;
+    }
+
+    .hero-crown {
+      position: absolute;
+      top: -9px;
+      right: -8px;
+      background: linear-gradient(135deg, #ffe033, var(--rutten-gold));
+      color: #111827;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+      animation: floatCrown 2.6s ease-in-out infinite;
+    }
+
+    @keyframes floatCrown {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-3px) rotate(6deg); }
+    }
+
+    .pst-leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pst-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      box-shadow: 0 2px 6px rgba(0, 32, 64, 0.03), inset 0 1px 0 #ffffff;
+      font-size: 0.88rem;
+      transition: transform 0.22s var(--spring-ease), background 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .pst-row:hover {
+      transform: translateX(4px);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 6px 14px rgba(0, 32, 64, 0.06);
+    }
+
+    .pst-rank-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: rgba(0, 48, 87, 0.09);
+      color: var(--volvo-navy);
+      font-weight: 800;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .pst-row:first-child .pst-rank-badge {
+      background: linear-gradient(135deg, #ffe033, var(--rutten-gold));
+      color: #111827;
+      box-shadow: 0 2px 6px rgba(245, 196, 0, 0.35);
+    }
+
+    .tens-pill {
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, rgba(245, 196, 0, 0.28), rgba(245, 196, 0, 0.16));
+      border: 1px solid rgba(245, 196, 0, 0.45);
+      color: #713f12;
+      font-weight: 700;
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ==================== BRANCH COMPARISON & HISTORY ==================== */
+    .matrix-card {
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .glass-table-wrap {
+      overflow-x: auto;
+      margin-top: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.44);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      box-shadow: inset 0 1px 0 #ffffff;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table.glass-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.glass-table th {
+      text-align: left;
+      padding: 11px 12px;
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(0, 48, 87, 0.09);
+      white-space: nowrap;
+    }
+
+    table.glass-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid rgba(0, 48, 87, 0.05);
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.2s ease;
+    }
+
+    table.glass-table tbody tr {
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    table.glass-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    table.glass-table tbody tr.active-branch-row {
+      background: rgba(0, 48, 87, 0.075);
+    }
+
+    table.glass-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .kpi-chip {
+      display: inline-block;
+      min-width: 48px;
+      text-align: center;
+      padding: 4px 9px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 0.81rem;
+      transition: transform 0.2s ease;
+    }
+
+    .chip-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22, 163, 74, 0.18); }
+    .chip-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(217, 119, 6, 0.2); }
+    .chip-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.18); }
+
+    .month-history-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 48, 87, 0.08);
+    }
+
+    .history-pill {
+      padding: 11px 12px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      box-shadow: 0 2px 8px rgba(0, 32, 64, 0.03), inset 0 1px 0 #ffffff;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.22s var(--spring-ease), background 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .history-pill:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 6px 14px rgba(0, 32, 64, 0.07);
+    }
+
+    .history-pill.ytd {
+      background: linear-gradient(135deg, rgba(0, 48, 87, 0.10), rgba(28, 107, 186, 0.08));
+      border-color: rgba(0, 48, 87, 0.18);
+      cursor: default;
+    }
+
+    /* ==================== REVIEWS & FOCUSPUNTEN ==================== */
+    .review-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .quote-box {
+      margin: 14px 0;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: inset 0 1px 0 #ffffff, 0 2px 8px rgba(0, 32, 64, 0.03);
+      font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.52;
+      color: var(--text-primary);
+      transition: opacity 0.24s ease, transform 0.24s var(--spring-ease);
+    }
+
+    .quote-box.quote-anim {
+      animation: quoteFadeIn 0.34s var(--spring-ease);
+    }
+
+    @keyframes quoteFadeIn {
+      0% { opacity: 0; transform: translateY(6px) scale(0.99); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .review-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .mini-arrow-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 48, 87, 0.14);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 2px 6px rgba(0, 32, 64, 0.05), inset 0 1px 0 #ffffff;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--volvo-navy);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring-ease);
+    }
+
+    .mini-arrow-btn:hover {
+      background: var(--volvo-navy);
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+
+    .mini-arrow-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Actionable Focuspunten Card */
+    .focus-card {
+      margin-top: 18px;
+      padding: 26px;
+    }
+
+    .focus-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .focus-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .focus-list li {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      box-shadow: 0 2px 8px rgba(0, 32, 64, 0.03), inset 0 1px 0 #ffffff;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      transition: transform 0.24s var(--spring-ease), background 0.24s ease;
+    }
+
+    .focus-list li:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .focus-list li strong {
+      color: var(--volvo-navy);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    /* Apple Glass Footer */
+    .glass-footer {
+      margin-top: 28px;
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(0, 32, 64, 0.04), inset 0 1px 0 #ffffff;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .glass-footer .brand-logo-img {
+      height: 24px;
+    }
+
+    /* ==================== ADMIN DATA UPLOAD MODAL ==================== */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(10, 22, 40, 0.44);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      overflow-y: auto;
+      animation: fadeInBackdrop 0.25s ease;
+    }
+
+    @keyframes fadeInBackdrop {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalSpringIn {
+      0% { opacity: 0; transform: translateY(24px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 780px;
+      max-height: 92vh;
+      max-height: 92dvh;
+      overflow-y: auto;
+      padding: 30px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 249, 253, 0.92) 100%);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border-radius: 28px;
+      border: 1px solid #ffffff;
+      box-shadow: 0 28px 70px rgba(0, 20, 45, 0.28), inset 0 1.5px 0 #ffffff;
+      animation: modalSpringIn 0.38s var(--spring-ease);
+    }
+
+    .dropzone {
+      margin-top: 14px;
+      padding: 28px 20px;
+      border: 2px dashed rgba(0, 48, 87, 0.25);
+      border-radius: 20px;
+      background: rgba(0, 48, 87, 0.03);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.24s var(--spring-ease);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--volvo-blue);
+      background: rgba(28, 107, 186, 0.07);
+      transform: scale(1.01);
+    }
+
+    .rank-inputs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .rank-box {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(0, 48, 87, 0.04);
+      border: 1px solid rgba(0, 48, 87, 0.09);
+    }
+
+    .rank-box h4 {
+      font-size: 0.9rem;
+      color: var(--volvo-navy);
+      margin-bottom: 8px;
+    }
+
+    .rank-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .rank-pair label {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .rank-pair input {
+      padding: 8px 10px;
+      font-size: 0.88rem;
+    }
+
+    .github-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(0, 48, 87, 0.04);
+      border: 1px solid rgba(0, 48, 87, 0.1);
+    }
+
+    .action-buttons-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-secondary {
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0, 48, 87, 0.2);
+      background: #ffffff;
+      color: var(--volvo-navy);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s var(--spring-ease);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 48, 87, 0.05);
+      transform: translateY(-1px);
+    }
+
+    /* ==================== MOBILE & TABLET RESPONSIVE UX ==================== */
+    @media (max-width: 1120px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .mid-grid { grid-template-columns: 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      .topbar {
+        top: 8px;
+        padding: 12px 14px;
+        gap: 10px;
+        border-radius: 20px;
+      }
+      .brand-logo-topbar {
+        order: 1;
+      }
+      .topbar-controls {
+        order: 2;
+        margin-left: auto;
+        gap: 6px;
+      }
+      .segmented-control {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .seg-btn {
+        flex: 1;
+        text-align: center;
+        padding: 9px 10px;
+        font-size: 0.82rem;
+      }
+    }
+
+    @media (max-width: 680px) {
+      #app-container {
+        padding: 10px 12px 44px;
+      }
+      .login-card {
+        padding: 32px 22px;
+        border-radius: 24px;
+      }
+      .brand-logo-login {
+        padding: 12px 20px;
+      }
+      .brand-logo-login .brand-logo-img {
+        height: 36px;
+      }
+      .brand-logo-topbar {
+        padding: 5px 10px;
+        border-radius: 12px;
+      }
+      .brand-logo-topbar .brand-logo-img {
+        height: 25px;
+      }
+      .icon-pill-btn {
+        padding: 8px 11px;
+        font-size: 0.78rem;
+        min-height: 38px;
+      }
+      #notif-label,
+      .upload-btn-text {
+        display: none;
+      }
+      .month-pill-select {
+        padding: 7px 11px;
+        font-size: 0.8rem;
+        min-height: 38px;
+      }
+      .context-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      /* Compact 2-column sub-layout for national rank cards on mobile */
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .kpi-grid > .osat-hero-card,
+      .kpi-grid > .stat-card:last-child {
+        grid-column: 1 / -1;
+      }
+      .osat-hero-card,
+      .stat-card,
+      .hero-pst-card,
+      .matrix-card,
+      .review-card,
+      .focus-card {
+        padding: 18px 16px;
+        border-radius: 22px;
+      }
+      .rank-number {
+        font-size: 1.95rem;
+        margin: 8px 0 6px;
+      }
+      .rank-number span {
+        font-size: 0.95rem;
+      }
+      .hero-spotlight {
+        padding: 14px;
+        gap: 14px;
+      }
+      .btn-voucher {
+        width: 100%;
+      }
+      .voucher-studio-grid {
+        grid-template-columns: 1fr;
+      }
+      .gift-choice-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-avatar {
+        width: 54px;
+        height: 54px;
+        font-size: 1.25rem;
+      }
+      /* Sticky first column in comparison table on mobile */
+      table.glass-table th:first-child,
+      table.glass-table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: rgba(246, 249, 253, 0.94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 2px 0 6px rgba(0, 32, 64, 0.04);
+      }
+      .focus-columns { grid-template-columns: 1fr; gap: 12px; }
+      .rank-inputs-grid { grid-template-columns: 1fr; }
+      .action-buttons-row { grid-template-columns: 1fr; }
+      .month-history-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      /* Bottom-sheet modal on mobile + 16px inputs to prevent iOS zoom */
+      .modal-backdrop {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .modal-card {
+        max-height: 92dvh;
+        padding: 22px 18px 30px;
+        border-radius: 26px 26px 0 0;
+      }
+      .glass-input, .glass-select, .glass-textarea {
+        font-size: 16px;
+      }
+      .glass-footer {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .seg-btn {
+        font-size: 0.76rem;
+        padding: 8px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg"></div>
+
+  <!-- ==================== 1. LOGIN PAGINA ==================== -->
+  <section id="login-screen">
+    <div class="glass-card login-card" id="login-card-box">
+      <div class="brand-logo brand-logo-login">
+        <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
+      </div>
+
+      <div>
+        <div class="login-badge">✦ Customer Champion Portal</div>
+      </div>
+      <p class="login-subtitle">Log in om de maandelijkse klanttevredenheid, CSA-scores en Customer Hero resultaten van Volvo Rutten te bekijken.</p>
+
+      <form class="login-form" id="login-form">
+        <div class="input-group">
+          <label for="login-user">Gebruikersnaam</label>
+          <input class="glass-input" type="text" id="login-user" placeholder="Bijv. VolvoRutten" autocomplete="username" required />
+        </div>
+        <div class="input-group">
+          <label for="login-pass">Wachtwoord</label>
+          <input class="glass-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <div class="remember-row">
+          <label><input type="checkbox" id="login-remember" checked /> Ingelogd blijven</label>
+          <span style="font-size: 0.76rem; color: var(--text-muted);">Echt • Venlo • Boxmeer</span>
+        </div>
+        <div class="login-error" id="login-error">Onjuiste gebruikersnaam of wachtwoord.</div>
+        <button type="submit" class="btn-primary">Inloggen op Dashboard</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== 2. HOOFDDASHBOARD ==================== -->
+  <main id="app-container">
+    <!-- Top Glass Navigation -->
+    <header class="topbar animate-in" style="--delay: 0ms;">
+      <div class="brand-logo brand-logo-topbar">
+        <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
+      </div>
+
+      <nav class="segmented-control" id="branch-switcher" aria-label="Vestiging kiezen">
+        <div class="seg-pill-indicator" id="seg-pill-indicator" aria-hidden="true"></div>
+        <button class="seg-btn active" data-branch="Totaal">Totaal Rutten</button>
+        <button class="seg-btn" data-branch="Echt">Echt</button>
+        <button class="seg-btn" data-branch="Venlo">Venlo</button>
+        <button class="seg-btn" data-branch="Boxmeer">Boxmeer</button>
+      </nav>
+
+      <div class="topbar-controls">
+        <select id="month-selector" class="month-pill-select" aria-label="Maand selecteren"></select>
+        <button id="notif-toggle-btn" class="icon-pill-btn" title="Ontvang een melding bij een nieuw maandoverzicht">
+          <span id="notif-icon">🔔</span>
+          <span id="notif-label">Meldingen</span>
+        </button>
+        <button id="open-upload-btn" class="icon-pill-btn navy" title="Nieuwe maanddata uploaden">
+          <span>📤</span>
+          <span class="upload-btn-text">Data Uploaden</span>
+        </button>
+        <button id="logout-btn" class="icon-pill-btn" title="Uitloggen">Uitloggen</button>
+      </div>
+    </header>
+
+    <!-- Live Update Notification Toast -->
+    <div id="update-banner">
+      <div>
+        <strong style="font-size: 0.95rem;">🎉 Nieuw Maandoverzicht beschikbaar!</strong>
+        <div id="update-banner-text" style="font-size: 0.84rem; opacity: 0.88; margin-top: 2px;">Bekijk direct de nieuwste resultaten van Volvo Rutten.</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="view-latest-btn" class="icon-pill-btn" style="background: #F5C400; color: #111827; border: none;">Bekijk resultaten</button>
+        <button id="dismiss-banner-btn" class="icon-pill-btn" style="background: rgba(255,255,255,0.16); color: #fff; border: none;">✕</button>
+      </div>
+    </div>
+
+    <!-- Context Title -->
+    <div class="context-header animate-in" style="--delay: 40ms;">
+      <div>
+        <h1 class="context-title" id="dashboard-heading">Volvo Rutten — Oktober 2026</h1>
+        <p class="context-meta" id="dashboard-subheading">Aftersales &amp; Service Klanttevredenheid • Bron: One Voice Portal</p>
+      </div>
+      <div class="glass-card" style="padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: var(--volvo-navy);">
+        <span id="respondent-badge">0 respondenten</span> • <span id="tens-total-badge">0× een 10</span>
+      </div>
+    </div>
+
+    <!-- ROW 1: 4 HERO KPI CARDS -->
+    <section class="kpi-grid">
+      <!-- Card 1: OSAT -->
+      <article class="glass-card osat-hero-card animate-in" style="--delay: 80ms;">
+        <div class="card-kicker">OSAT Score (Algemene Tevredenheid)</div>
+        <div class="osat-main-row">
+          <div>
+            <div class="big-metric" id="kpi-osat">--%</div>
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span class="delta-pill delta-neutral" id="kpi-osat-delta">--</span>
+              <span style="font-size: 0.78rem; opacity: 0.78;">t.o.v. vorige maand</span>
+            </div>
+          </div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 74 74">
+              <circle cx="37" cy="37" r="30" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="7" />
+              <circle id="osat-ring-circle" cx="37" cy="37" r="30" fill="none" stroke="#22c55e" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" />
+            </svg>
+            <div class="ring-star">★</div>
+          </div>
+        </div>
+        <div style="font-size: 0.8rem; opacity: 0.82; border-top: 1px solid rgba(255,255,255,0.14); padding-top: 10px;">
+          Cumulatief 2026: <strong id="kpi-osat-ytd">--%</strong> • Doel: <strong>&gt; Land</strong>
+        </div>
+      </article>
+
+      <!-- Card 2: Positie in het land (Maand) -->
+      <article class="glass-card stat-card animate-in" style="--delay: 140ms;">
+        <div>
+          <div class="card-kicker">Positie in het Land (Maand)</div>
+          <div class="rank-number" id="kpi-rank-month">#--<span> / 82</span></div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="delta-pill delta-light-neutral" id="kpi-rank-delta">--</span>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">t.o.v. vorige maand</span>
+          </div>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-secondary); border-top: 1px solid rgba(0,48,87,0.08); padding-top: 10px; margin-top: 14px;">
+          Landelijke ranking Nederlandse Volvo-dealers
+        </div>
+      </article>
+
+      <!-- Card 3: Positie in het land (Cumulatief) & Top 20 Doel -->
+      <article class="glass-card stat-card animate-in" style="--delay: 200ms;">
+        <div>
+          <div class="card-kicker">Positie in het Land (Cumulatief)</div>
+          <div class="rank-number" id="kpi-rank-cum">#--<span> / 82</span></div>
+          <div id="top20-status-pill" class="delta-pill delta-light-up" style="font-size: 0.78rem;">
+            🎯 Doel: Top 20 van Nederland
+          </div>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-secondary); border-top: 1px solid rgba(0,48,87,0.08); padding-top: 10px; margin-top: 14px;">
+          Jaarstand Volvo Cars Nederland
+        </div>
+      </article>
+
+      <!-- Card 4: CSA KPI's -->
+      <article class="glass-card stat-card animate-in" style="--delay: 260ms;">
+        <div class="card-kicker">CSA KPI-Scores (Doelstellingen)</div>
+        <div class="csa-list">
+          <div>
+            <div class="csa-item-head">
+              <span>Begrip klantbehoefte <small style="color:var(--text-muted)">(doel 69%)</small></span>
+              <strong id="kpi-begrip-val">--%</strong>
+            </div>
+            <div class="csa-bar-track"><div id="kpi-begrip-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div></div>
+          </div>
+          <div>
+            <div class="csa-item-head">
+              <span>Ontvangen toelichting <small style="color:var(--text-muted)">(doel 66%)</small></span>
+              <strong id="kpi-toelichting-val">--%</strong>
+            </div>
+            <div class="csa-bar-track"><div id="kpi-toelichting-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div></div>
+          </div>
+          <div>
+            <div class="csa-item-head">
+              <span>Right First Time (RFTIT) <small style="color:var(--text-muted)">(doel 93%)</small></span>
+              <strong id="kpi-rftit-val">--%</strong>
+            </div>
+            <div class="csa-bar-track"><div id="kpi-rftit-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ROW 2: CUSTOMER HERO (PST) & VESTIGINGEN / HISTORIE MATRIX -->
+    <section class="mid-grid">
+      <!-- Customer Hero Card -->
+      <article class="glass-card hero-pst-card animate-in" style="--delay: 320ms;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="card-kicker">🏆 Customer Hero van de Maand</span>
+            <span class="tens-pill">Bol.com bon € 25,-</span>
+          </div>
+
+          <div class="hero-spotlight" id="hero-spotlight-box">
+            <div class="hero-spotlight-main">
+              <div class="hero-avatar" id="hero-initials">
+                NM
+                <span class="hero-crown">👑</span>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--volvo-navy);" id="hero-name">Niels Muijres</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;" id="hero-branch-meta">Vestiging Venlo • 4× een 10 deze maand</div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--green); margin-top: 4px;" id="hero-osat-meta">100% OSAT • Super gedaan!</div>
+              </div>
+            </div>
+            <button type="button" class="btn-voucher" id="open-voucher-btn" title="Genereer en download A4 Cadeaubon PDF">
+              <span>🎁</span>
+              <span>Maak Cadeaubon</span>
+            </button>
+          </div>
+
+          <div class="card-kicker" style="margin-bottom: 10px;">PST Ranking — Aantal 10’en deze maand</div>
+          <div class="pst-leaderboard" id="pst-leaderboard-list"></div>
+        </div>
+      </article>
+
+      <!-- Vestigingen Vergelijking & Maandverloop -->
+      <article class="glass-card matrix-card animate-in" style="--delay: 380ms;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span class="card-kicker">Overzicht per Vestiging &amp; Historie</span>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Klik op een vestiging om te filteren • Groen = op doel</span>
+          </div>
+
+          <div class="glass-table-wrap">
+            <table class="glass-table">
+              <thead>
+                <tr>
+                  <th>Vestiging</th>
+                  <th>OSAT</th>
+                  <th>Begrip (69)</th>
+                  <th>Toel. (66)</th>
+                  <th>RFTIT (93)</th>
+                  <th>Resp.</th>
+                  <th>10’en</th>
+                </tr>
+              </thead>
+              <tbody id="branch-comparison-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <div class="card-kicker" style="margin-top: 16px;">OSAT Ontwikkeling (Laatste maanden &amp; Jaarstand)</div>
+          <div class="month-history-strip" id="month-history-strip"></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ROW 3: TOP REVIEW, TIP REVIEW & TIP VAN DE MAAND -->
+    <section class="bottom-grid">
+      <article class="glass-card review-card animate-in" id="top-review-card" style="--delay: 440ms;">
+        <div>
+          <div class="card-kicker" style="color: var(--green);">★ Top Review</div>
+          <div class="quote-box" id="top-review-quote">“Geen positieve opmerking gevonden voor deze selectie.”</div>
+        </div>
+        <div class="review-nav">
+          <span id="top-review-meta">—</span>
+          <div style="display: flex; gap: 6px;">
+            <button class="mini-arrow-btn" id="prev-top-review" title="Vorige review">‹</button>
+            <button class="mini-arrow-btn" id="next-top-review" title="Volgende review">›</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass-card review-card animate-in" id="tip-review-card" style="--delay: 500ms;">
+        <div>
+          <div class="card-kicker" style="color: var(--amber);">💡 Tip Review (Leermoment)</div>
+          <div class="quote-box" id="tip-review-quote">“Geen verbeterpunten gemeld in deze periode!”</div>
+        </div>
+        <div class="review-nav">
+          <span id="tip-review-meta">—</span>
+          <div style="display: flex; gap: 6px;">
+            <button class="mini-arrow-btn" id="prev-tip-review" title="Vorige tip">‹</button>
+            <button class="mini-arrow-btn" id="next-tip-review" title="Volgende tip">›</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass-card review-card animate-in" style="--delay: 560ms; background: linear-gradient(145deg, rgba(255,255,255,0.84), rgba(0,48,87,0.06));">
+        <div>
+          <div class="card-kicker" style="color: var(--volvo-navy);">🎯 Tip van de Maand</div>
+          <div class="quote-box" style="font-style: normal; font-weight: 700; color: var(--volvo-navy);" id="tip-month-quote">“Doe alsof het je eigen auto is”</div>
+          <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5;" id="tip-month-body"></p>
+        </div>
+        <div class="review-nav" style="margin-top: 12px;">
+          <strong id="tip-month-author" style="color: var(--volvo-navy);">—</strong>
+          <span>Customer Champion</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ROW 4: CONCRETE FOCUSPUNTEN VOOR DE WERKPLAATS / PST'ERS -->
+    <section class="glass-card focus-card animate-in" style="--delay: 620ms;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <div class="card-kicker">Actiepunten voor het Team</div>
+          <h2 style="font-size: 1.18rem; font-weight: 700; margin-top: 3px;">Focuspunten: Begrip van klantbehoefte &amp; Ontvangen toelichting</h2>
+        </div>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Praktische handvatten voor elke werkorder</span>
+      </div>
+      <div class="focus-columns">
+        <ul class="focus-list" id="focus-list-left"></ul>
+        <ul class="focus-list" id="focus-list-right"></ul>
+      </div>
+    </section>
+
+    <!-- APPLE GLASS FOOTER MET OFFICIEEL LOGO -->
+    <footer class="glass-footer animate-in" style="--delay: 680ms;">
+      <div class="brand-logo">
+        <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
+      </div>
+      <div>Customer Champion Dashboard • Echt • Venlo • Boxmeer</div>
+    </footer>
+  </main>
+
+  <!-- ==================== 3. ADMIN UPLOAD & GITHUB STUDIO MODAL ==================== -->
+  <div class="modal-backdrop" id="upload-modal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+        <div>
+          <div class="brand-logo brand-logo-modal">
+            <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
+          </div>
+          <div class="card-kicker">Beheer &amp; Maandupdate</div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--volvo-navy);">Nieuw Maandoverzicht Genereren</h2>
+        </div>
+        <button id="close-upload-btn" class="icon-pill-btn">✕ Sluiten</button>
+      </div>
+
+      <!-- Stap 1: Excel Upload -->
+      <div style="margin-top: 18px;">
+        <strong style="font-size: 0.92rem;">Stap 1: Sleep jouw One Voice Excel-export hierin</strong>
+        <div class="dropzone" id="excel-dropzone">
+          <div style="font-size: 1.8rem; margin-bottom: 6px;">📊</div>
+          <div style="font-weight: 700; color: var(--volvo-navy);">Klik of sleep <code>Volvo_Cars_Responses_Export.xlsx</code> hierheen</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Filtert automatisch op <em>Type evenement = Service</em> en herkent Echt, Venlo &amp; Boxmeer</div>
+          <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" style="display:none;" />
+        </div>
+        <div id="upload-parse-status" style="margin-top: 10px; font-size: 0.86rem; font-weight: 600; color: var(--green);"></div>
+      </div>
+
+      <!-- Stap 2: 3 handmatige cijfers per vestiging -->
+      <div style="margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <strong style="font-size: 0.92rem;">Stap 2: Vul de landelijke positie (van 82) per vestiging in</strong>
+          <select id="admin-target-month" class="month-pill-select"></select>
+        </div>
+
+        <div class="rank-inputs-grid">
+          <div class="rank-box">
+            <h4>📍 Echt (6NL134000)</h4>
+            <div class="rank-pair">
+              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Echt-month" min="1" max="82" placeholder="16" /></div>
+              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Echt-cum" min="1" max="82" placeholder="19" /></div>
+            </div>
+          </div>
+          <div class="rank-box">
+            <h4>📍 Venlo (6NL178800)</h4>
+            <div class="rank-pair">
+              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Venlo-month" min="1" max="82" placeholder="14" /></div>
+              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Venlo-cum" min="1" max="82" placeholder="17" /></div>
+            </div>
+          </div>
+          <div class="rank-box">
+            <h4>📍 Boxmeer (6NL199600)</h4>
+            <div class="rank-pair">
+              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Boxmeer-month" min="1" max="82" placeholder="22" /></div>
+              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Boxmeer-cum" min="1" max="82" placeholder="24" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stap 2b: Optionele Tip van de Maand aanpassen -->
+      <details style="margin-top: 16px;">
+        <summary style="cursor: pointer; font-size: 0.88rem; font-weight: 700; color: var(--volvo-navy);">Optioneel: Tip van de Maand tekst aanpassen</summary>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+          <div>
+            <label style="font-size: 0.78rem; color: var(--text-secondary);">Quote</label>
+            <input class="glass-input" type="text" id="admin-tip-quote" />
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; color: var(--text-secondary);">Naam / Auteur</label>
+            <input class="glass-input" type="text" id="admin-tip-author" />
+          </div>
+        </div>
+        <div style="margin-top: 8px;">
+          <label style="font-size: 0.78rem; color: var(--text-secondary);">Toelichting</label>
+          <textarea class="glass-textarea" rows="2" id="admin-tip-body"></textarea>
+        </div>
+      </details>
+
+      <!-- Stap 3: 1 bestand genereren voor GitHub map 'maandoverzichten' -->
+      <div class="action-buttons-row">
+        <button id="download-datajs-btn" class="btn-primary">
+          ⬇️ Download <code>data.js</code> (voor map <code>maandoverzichten/</code>)
+        </button>
+        <button id="apply-preview-btn" class="btn-secondary">
+          👁️ Direct bekijken in dashboard
+        </button>
+      </div>
+
+      <!-- Extra: 1-klik Direct naar GitHub pushen -->
+      <details class="github-box">
+        <summary style="cursor: pointer; font-size: 0.88rem; font-weight: 700; color: var(--volvo-navy);">
+          ⚡ Power-workflow: Direct vanuit hier naar GitHub pushen (1 klik)
+        </summary>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 8px 0 12px;">
+          Vul eenmalig je GitHub repository en een Personal Access Token (met <em>Contents: Read &amp; Write</em> rechten) in. Deze gegevens worden alleen lokaal in jouw eigen browser bewaard.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <input class="glass-input" type="text" id="gh-repo" placeholder="gebruikersnaam/repo-naam" />
+          <input class="glass-input" type="text" id="gh-branch" placeholder="main" value="main" />
+        </div>
+        <div style="margin-top: 8px;">
+          <input class="glass-input" type="password" id="gh-token" placeholder="github_pat_..." />
+        </div>
+        <button id="push-github-btn" class="btn-primary" style="margin-top: 10px; background: linear-gradient(135deg, #16a34a, #15803d);">
+          🚀 Publiceer <code>maandoverzichten/data.js</code> direct naar GitHub
+        </button>
+        <div id="gh-push-status" style="margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ==================== 4. CADEAUBON / A4 CERTIFICAAT STUDIO MODAL ==================== -->
+  <div class="modal-backdrop" id="voucher-modal">
+    <div class="modal-card" style="max-width: 860px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+        <div>
+          <div class="brand-logo brand-logo-modal">
+            <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
+          </div>
+          <div class="card-kicker">Customer Hero Beloning • A4 Certificaat</div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--volvo-navy);">Maak Cadeaubon voor de Customer Hero</h2>
+        </div>
+        <button id="close-voucher-btn" class="icon-pill-btn">✕ Sluiten</button>
+      </div>
+
+      <div class="voucher-studio-grid">
+        <!-- Linkerkolom: Cadeau kiezen & instellingen -->
+        <div>
+          <strong style="font-size: 0.92rem; color: var(--volvo-navy); display: block;">1. Kies het cadeau voor op de A4 cadeaubon</strong>
+
+          <div class="gift-choice-grid" id="gift-choice-grid">
+            <!-- Optie 1: Standaard cadeau (Bol.com cadeaukaart) -->
+            <div class="gift-choice-card selected" data-gift-type="bol" id="gift-card-bol" role="button" tabindex="0">
+              <div class="gift-choice-check">✓</div>
+              <div style="font-size: 1.45rem; margin-bottom: 6px;">🛍️</div>
+              <div style="font-weight: 800; font-size: 0.92rem; color: var(--volvo-navy);">Standaard cadeau</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">Bol.com cadeaukaart t.w.v. € 25,-</div>
+            </div>
+
+            <!-- Optie 2: Custom cadeau invullen -->
+            <div class="gift-choice-card" data-gift-type="custom" id="gift-card-custom" role="button" tabindex="0">
+              <div class="gift-choice-check">✓</div>
+              <div style="font-size: 1.45rem; margin-bottom: 6px;">✨</div>
+              <div style="font-weight: 800; font-size: 0.92rem; color: var(--volvo-navy);">Custom cadeau</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">Zelf een cadeau of bedrag invullen</div>
+            </div>
+          </div>
+
+          <!-- Extra invulveld bij Custom Cadeau -->
+          <div id="custom-gift-box" style="display: none; margin-top: 14px;">
+            <label for="voucher-custom-gift" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--volvo-navy); margin-bottom: 6px;">
+              Omschrijving van het custom cadeau
+            </label>
+            <input
+              class="glass-input"
+              type="text"
+              id="voucher-custom-gift"
+              placeholder="Bijv. Dinerbon t.w.v. € 50,- of Autopoetspakket"
+              value=""
+            />
+          </div>
+
+          <!-- Gegevens van de winnaar (automatisch ingevuld, aanpasbaar indien gewenst) -->
+          <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(0, 48, 87, 0.08);">
+            <strong style="font-size: 0.92rem; color: var(--volvo-navy); display: block; margin-bottom: 10px;">2. Gegevens op het A4 certificaat</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label for="voucher-winner-name" style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Naam Customer Hero</label>
+                <input class="glass-input" type="text" id="voucher-winner-name" />
+              </div>
+              <div>
+                <label for="voucher-winner-branch" style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Vestiging &amp; Maand</label>
+                <input class="glass-input" type="text" id="voucher-winner-branch" />
+              </div>
+            </div>
+            <div style="margin-top: 10px;">
+              <label for="voucher-personal-note" style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Persoonlijke felicitatie / klantcompliment op A4</label>
+              <textarea class="glass-textarea" rows="2" id="voucher-personal-note"></textarea>
+            </div>
+          </div>
+
+          <button type="button" id="download-voucher-pdf-btn" class="btn-primary" style="margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>⬇️</span>
+            <span>Genereer &amp; Download A4 PDF</span>
+          </button>
+          <div id="voucher-download-status" style="margin-top: 8px; font-size: 0.82rem; font-weight: 600; color: var(--green); text-align: center;"></div>
+        </div>
+
+        <!-- Rechterkolom: Live A4 Preview -->
+        <div class="a4-preview-wrap">
+          <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px;">
+            Live A4 Voorbeeld (210 × 297 mm)
+          </div>
+          <canvas id="voucher-preview-canvas" width="1654" height="2339"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIGURATIE INLOGGEGEVENS ====================
+    // Pas hier eventueel de standaard inloggegevens voor het team aan:
+    const AUTH_CONFIG = {
+      username: "VolvoRutten",
+      password: "Rutten2026"
+    };
+
+    const MONTH_NAMES_NL = {
+      "01": "Januari", "02": "Februari", "03": "Maart", "04": "April",
+      "05": "Mei", "06": "Juni", "07": "Juli", "08": "Augustus",
+      "09": "September", "10": "Oktober", "11": "November", "12": "December"
+    };
+
+    const DEALER_MAP = {
+      "6NL134000": "Echt",
+      "6NL178800": "Venlo",
+      "6NL199600": "Boxmeer"
+    };
+
+    let appData = window.VOLVO_RUTTEN_DATA || { responses: [], nationalRanks: {} };
+    let currentBranch = "Totaal";
+    let currentMonth = appData.latestMonth || "2026-10";
+    let topReviewIdx = 0;
+    let tipReviewIdx = 0;
+    let currentTopReviews = [];
+    let currentTipReviews = [];
+
+    // Ingebouwde base64 fallback voor het officiële VOLVO | Rutten logo (werkt ook als los HTML-bestand)
+    const OFFICIAL_LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATAAAAA0CAYAAAANHWRRAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAABNlSURBVHhe7Z0PlB1Vfcf3Xwgg/8lm9829v3vnbbbEEhQkWlEp/qFSKtjaqtRC/xxtEQRFkxYFCxVbKlXCH1FRexREabVpa3sIhR6UbrBBQppk585mSWTBgPwLSRNC/uzOnbfJ9Hxn7qyzd99u3r73djen537OuSebeXfunbkz853f73d/M9PS4nA4HA6Hw+FwOByO/yckSUubDsSSJBQn5sv2rS13JYNLjhhf85ckLS2t6b9JS2vc75+RKFmOlX9WpOQVySA/ya7vcDgcTQMCtGPNgmP1Bv76ZGN3pw79lclmdjIEaXcoToxD/5FEMQ5xQymuu3JlS/tIIN8JwcNvceBfrpUfDveLt2klt8ShXI22ius4HA5H4yQtrcnKlnZYV1qJD0C4tJL/Gim5TQ/4vx9t4L2RErdpJXdG/fLKWJX/OK0PIUvX6zxmz3pvQRzKW6JAPKRD8cEolH1ayeFYyV1aSY2/db/4tN21w+FwNETS5x+p++Ul8cby6fGAuEqHckQreVAreUCr9O9dWomKVnJUB3I4CsRle+FeDizsSoZ6O7WSq2Llr9VK7jPrRDpM/03GSiBHtZLr7b4dDoejIeAyaiWfjwJappV8zIjNL8VnfIE1tXkkEDdtH+w8Busnqrw4DqUy4mXXz8torORGu2+Hw+FoiEj556dWEyyszPKyxWecgMXK/3IxmJ/c0NK2X8kztZJbq9QvrCduG9+zw+FwNMhIWD7HuH+26EwosZLbhzfKt0SqvHh43SJCDAxtROtpkQ7lU3b9sfVCf89wIM62+3Y4HI6G2IsZRyU32aIzSdE6lC9qJZ+LlNwcK/HdOJC3aiX7jXtp10f8axgB/q19/pF23w6Hw9EQSV9Lh1Z0mg79wLiSmRuJWFgW0N+vlYwncS/hduK3YvwL9dDO3kjJn2slvpBsWXCs3a/D4XA0hTQlIhQn6kB8EQF9reRLcSgfrYTi01EgPx4F8n4jVuMFLJQj5jdYZNvS1Aslt8ahvCMakBcggTVJWjrs/hwOh2NGyHO88PfQA73zK6FcHgVixyQWGMqqPY+zk2HJJX3v6EDiq92mw+FwzBpJ0tJeQRZ9IPsLeWG2cKUlDtO8r4vzgL7D4XDMKfGmnjfFSr6sAzHRbZxYDsYD8lvP/ZQfZbfjcDgcs06s5AoTnLfFqnoJ5ea9atFCux2Hw+GYdWLlf2cqt7FKGdHKv9a5kQ6HY87Robw+xgPYgaikZWKqRLWydpvqeo3dlsPhcMwqiGfhXV56oHxRRYlzR5QsR0p+bUq3MpQqGeo9zm7L4XA4Zh0845imVKxfOm+kX16MxNQJb5kolDiUO3Xov9Zux+FwOGYdJKCmLzJU4rZYyd01uJBRFNAKux2HwzEztHPO30HElhfKMiHYp4jYx3y/2/c87+iWlvFvH62B9s7OzmO6uibEgyZbftiQZuQP9R63b53frUP/MzqQeLyollQKlDgK5Cq7zSmRsnTmoYv3BiJaZFbpYIydPrFOVjhv+N3Vbb29vfMZY6egPaLSG/MiRGkpY+yM3t6T4CfPs1esk9ZSqSSwj/a+FAv69X3/BHvlOmnlnDO7j2oFY+376UOsrVIuKFXfTu8Nvu/B9J7uhVKkdcmSJUd4nrcA7WGsi2OPfoTo6kEdXEj2ynMBY+xkKWUJ227/NhvguDDGVhCxA0RsmIjtLxYh2B4ido85b2reRrTLOVslhHdHcTnn/CjOvQeJ2K3F5XMFXomzb9Dvjgf9M+JQLI0H6I2VgfJ5sfLxbq/hqdzFqgUJr6F/jd3PlBCxSpUyakr+/xEi7z7UxwlOxHZOVp/z0iV2H9OgFRcsEQuJ2N5C2zhBUPC3JmJP4S5nr1wPEEvO+VdMu1ONw27OS79rr18P6JOIfaHKOFfr938556+DcBCxv6y2nULwmIg9jruz3VetZBeNh3F4kYihvXwb8vHHv7uJ2GqcA/b6cwHn3p9y7v2VEdVZpyBgcalU+tVyuSR7ekoCBWJPxC43Y/kdY4nVBIQK48y59+3icrRB5D1CxO4sLp8L8BbWKBA/iZCsisB89hJDCBbKdNIniuWZfQPlLruvKSHyrjDlH9OLg7OEaKyMcs6+CXNYCHYh6uOgCcE/yrn3OSL+anZi80HO+SfQDuf8V+w+agEXtRDsMnOR4MJE//s5925C30LwS4nYLiJ20FxQENUf4mDbbU2TNs75280+XgvBKOw/+hqCa4Btk7KrbK9cJ22e5701G3e2zIh1cdwPcs42Z/3yjwqRftmlLbOG2MeI2GNmjPYJwT+PdoRgH6zXMvI8b7EQ7KdELDL7jG14PDse3vtwARoBw3JckE9JyS6w25ltOC9divPwcBCwBQvStyXAyspLG36HBUbEX5rOuZMLGJF3V3F5QcC+Xlw+m+ARIVhaOrOyJnvDRL1lU/ErRrWSDnh3d3cnEXvaupAOcM6+W8XnbjcXO074Yc69i83FU7OZbNGOA2zEI7+ARom8fzN9p9uYCY0H0cy3r0Lk3Qzxsxusg3wMnivuP5H338ayqXffpiI90YnY9ZkgjxPOXeakLz6JD3dXGiGHoKxOx6eBh1+xPo5x4aaRkGB7Edsxbnob6hCxNYU66BuWYe8MjUtNHE4CNon1245jyzl7GVY0XEkpvbd6nkeFcWtDeAbndnYT717COf8tGAVE3o+E8H4D5wHWz5azJzhnDwjBzkXoI28Hf2NZVqf0mybkk547S5e2zENIhqj062gLbaKeEN7bqlzbU5Ks946OlPxxDQH5aZdYyW17VVd92fjYSSLvw0aUxkSMc28Pkfc7+TfbQE9Pz/FEbMBYaM+amFTdJzLuOIzY9y3xHCby/qBYD3c5IrbOutCfPumktP+GMe7xBAGb7kGeLr5/wgmcs/6CeKdFCPao1TcuiOvMMdpvj089SMneYgSxOPaBFe9rh1hYIjvCufhkvVZfMzicBKyKBZYG3IVg9xOxFyBaRF2nEXkvcc7/sBCv7CBinyViryB+zLl3AxF73sTUYJlvhYFgQg5YjviaWV56P9o55ZRTcN7iutienb/og20WQpy6dOnSecai+5r5HeGZ54k4QgUvCMH+ZTrjlzzdc7xWco8tPs0omKkcXpeKe30gsEzkDVonMy6kh00gGeAiwmDiZN7FGDvXamba4MBh0K1+cUBfV6yHgeac/YdV78DChQun5zdPwjQFrAOi32DgfAwzczXu5oGT1bhqEIk2Y6XiJEyt00nu+tOCyLvSEiaUOy3XvI3zbtz9cfHkdWIhvHstC3FWOYwEDJbp8kI4BqGUqzL3MRWb5Zk7ObmAcWKv4EaGBdNxITPRY5s5Z48S0Zsgnr7vdwvB/gvnsrHe0N6dJvRyF9oxMVXMmu5mjJ1VqwGC93NVcxujKoJUR9na6Ads24UonT3OncjKPin5e7CTiJdwns6uIE5zfzPct0w4JgjYrnK5vLhYD4MuxAQBO0i0wKv1AEzFNAQM7uybheCfgUtn/VYXsGLRl7VvCZH3EKwhMzOFeCTctxEp2bvsNupBiNInqwjnrYUbFkCc8PyigHHu4RxZ6QQsFTCMCSymfeZmkMZoheA/Z4xdm2/fVAKGG3YdAtaG+DBESAjvvegnLyaui1DAJQUBG+a8ZezGhJgq3Fsp+e/VeiNOLbBAvlJFfBotB3Qgv9fX1+D5lMU70qlaHITChcx+AWXn3Lsjmwnjr8KXbpJwHE3E0WfxIsLgQzTHqO5C8hfh0hbr1cs0BKzdiMlOCL71W720wVWvYg3Blb6iq6troYn/HcTkhXHbGyaLm6Q3pGKfqy3rDvlOtgsJ0fuscyHZCk6sUiqVzkQqC6wZE0veLqUsw4XLr5EZEDDEomG5Qzx/JgTrR0EIwEwCjWKSByEWIv5VztmTxfQjz0N6lLdNCHZRzQI22HlMjE+nVbHCGigHIyV/lASc2f3VQzuCe1Xuypi+/7q5Cx/g3Pv7JswA5rQjFsP5uNk43OG/sWRJy9jJabarGK+BNXJXs7bDCNgvCu0Xg/ggzZUiovOMmOwjonOsZuoGs41ErM8a9wPZLC/7sYmRbevu7vabJRzYNyLvP8fH37xXkc6Sx3NM2ge2K5+JRF24HnmdOeFwEbBiEB+CxRj7AM5TITjyuMYEAwF6CJgQ7I9ywUB9KdNJnHECJmsUMCL251m4hd1O5P2FlPzqYiEqnZMZJfyrRN6mosWM3EYIGJH3oZoFrM8/Mlb+7dNITp26IFcsEHcnAx5hhtPur146iPi3zZR5fiHl6QsJrC+4UM08eY2LdLu5y6cXEyYQpOx+jxDdp2IGBQfKCBt+hxU4iGTGBi/mDmRMY3YoE6YJaRQhY+xdsLQYY+808T+IqElebJ6AYVuyYG+anlIM6Odjn944LPeuURA2WGqEO7e6K3DVkdCKOCQRu6UQVkCdnbDIGhz3hjkcBQwYC+obJpn1T/Lty2YC0zy7y/Oxy+pCXOqywOBCGrEc7w1ldek03BTzPjhnAw0L2OCSI6JAfOIQH6+ttcDyehapE81+jXRbln2fJqzCEssLrDAIx1equFXNADGuy4Rgz5jgZ0yEJM30gq5wnl5EMJd3COF9GcLTqIhmiaypW4x2i/ta2F/8zast391EFzLFnLwI/kLIi32OcO5tN1PnNZ1s06BDCAHr4IdGnNE3xhr9Iq4Dyys2ruYAUek8HCu7kdmGyPsI0hSMmzbrTCZgIItpsscxW0hEiNG2l8vlLtwocBOCwGQ3bf56zOQXBczkj/UhvQXng5nhNOcGBMz7Fv7u6TnxeKRLmJvuPRArk5h9FBF9yFwn726qgA31zo8C8XdVLLBqLuU+HaSfW3shVv52Hcpn41C+Wqh7UAdiHdxSu5+mYDKJ/5qI3UjE/iYvMyReRdqRIoCpX87Z94j4PwjB74W7iDQCxOLsFRoAJvwFQnBMX2Nf8/3E38VSbfl1RkSbSRuyuLME1bQ/jP2NQng34G5b64lWJ60mgxx93p2PO44B5/wOzkvnN/ERrobhnP8arOO5mkgwAvQlCL0tYDiHs2Tl1AhY7fud3aiP42hulrcIUbpWCLYFQoN6uYBBkInYfVnKg3czhBrHvTCJNYAYLGOZK8o5/zOEFog4rLPlQnjYJoR6foBZyqxfHD8WWAKGp15erDUGhlQqiE2kxCPWY0IHogCfPyuIVygPxKG4235BYSXwryl8/xFtPIjcsmKdZoKdwgbYpSGrp0bQNwbbLjPRf5q3U2dp9raAybbnkCdZE8j7tscdZSb2tREwHnO2TUZoLsdM8SRx2PxG/ACeaMD2GqsNSeB4wuMpotIyk395X1EEMblCxNcjPQIhlDweaR4ef4xz9rBJdE6Pl+d5ryViD2XeC1d4gsNkCJi4bfrUB1xPHNuUxVlazvdNGOSQ44jX4uzfIN5rJ7HGodwT95cvHbdM4WO0AmGG8W3g02tKbhkTsEDe696F73DMDbjo55nnHKsKAMQDv5ucQZAKCtxCFIiMSXvARTzWBupjPdP2mOjk/ZnlxRtaR+5uQghNf3l76XZWEdl29F/YtklJP14biIt0aCWxZm9bfVAH4p8sAdsePTHxsUKIoA7k9abeaBT4X4RbatdzOByOppGortfESq41woMY1rBWUuEDtJVQXBMj3jUmYKKC5cnWiZNNCNaPDogLzXOUo1Egb8HMpl3P4XA4msau9T3HR4Hsg9sXh/6eSImrks3s5ORn3gIdCHyJG3EvCJvWyg+TLeQVHz8sEiv/zWMvOAzEDxLnQjocjpkkFTAl18DyGgnkR/Ivb2O5VuJ/zIxiJQr8byZbWtJZ08nAW1qjQKxKBSwUK5PnnIA5HI4ZJBnkvemHapXsL8asMMsYBfLjcAljJR9GrGz8mhMZeqB3fqTk1ekHbZV8bMbSKBwOhwMgeTUK5PZ4U/rA+Dj0RnFq+puSK2rJph9Lhk0FzH85Wd+cRwEdDodjAhAcreQ/x8r/CYL59u871iw4FtZXrOSaWiywVMD65ZXGAhvdH4qldr6Yw+FwNIUsd8sPY8wYmtjXuN+HeudXQv8aHcjhWuJZELA49JfFSu6Ildyllf85l0rhcDhmBN3vvy9Scls0IKu+RhyfTxtV9NuIgyX9/gmHeq4RaRNayRu18p/UoY/8sQ07tmSPSzkcDkfTGBrqnY/AvVbyucled4O4VyX03478r0ogzj6UO4hHh7QSK2Plh1EgLsOzkpgksOs5HA5H3cCSipV/llZib4RnFieZLUxjWkp8Kn3AOxQ3HcodhEsaKbkVibCVsHwOvsgdBeLCQ1luDofDUTOwpHQgr4vxvUYlv7R1kox5BO5HAv/DJjt/Q7Jl8ZTuYLyxfLpWcqcO5DPRAC3SaVKruGdblQkCh8PhqAu4hlrJm83bIx7EF7ftOgCWE95lHym5A3Urqnw1ZibtejkjSpZjCFj2ONH7YeFpJV8ansRFdTgcjmmDGccRJf9WK7kZllWkxn+jogjSK7SST+hADmklN+pw/Ad5ikSDvDeto/wn41DcpkP5hFZybzQg3r3yEPEzh8PhqJXWnWt7j0sGyl17N/Z2TpXjBbFLNvZ27l8vS4latBBxMbtODmYtk6GsLh4rwgdt8fYKrcS/Hyp+5nA4HA6Hw+GYK/4PoUHtPCuzz6kAAAAASUVORK5CYII=";
+
+    document.querySelectorAll(".brand-logo-img").forEach(img => {
+      img.addEventListener("error", () => {
+        if (img.src !== OFFICIAL_LOGO_DATA_URI) img.src = OFFICIAL_LOGO_DATA_URI;
+      });
+    });
+
+    // ==================== ANIMATIE HELPERS ====================
+    const activeAnimTimers = new WeakMap();
+
+    function animateValue(el, targetVal, formatFn, duration = 680) {
+      if (!el) return;
+      if (targetVal === null || targetVal === undefined || isNaN(targetVal)) {
+        el.textContent = formatFn(null);
+        el.dataset.numVal = "";
+        return;
+      }
+      const prevRaw = parseFloat(el.dataset.numVal);
+      const startVal = isNaN(prevRaw) ? 0 : prevRaw;
+      el.dataset.numVal = String(targetVal);
+
+      if (Math.abs(targetVal - startVal) < 0.01) {
+        el.textContent = formatFn(targetVal);
+        return;
+      }
+
+      if (activeAnimTimers.has(el)) {
+        cancelAnimationFrame(activeAnimTimers.get(el));
+      }
+
+      const startTime = performance.now();
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const eased = 1 - Math.pow(1 - progress, 4); // EaseOutQuart
+        const current = startVal + (targetVal - startVal) * eased;
+        el.textContent = formatFn(current);
+        if (progress < 1) {
+          activeAnimTimers.set(el, requestAnimationFrame(step));
+        } else {
+          el.textContent = formatFn(targetVal);
+        }
+      }
+      activeAnimTimers.set(el, requestAnimationFrame(step));
+    }
+
+    function updateSegmentedPill() {
+      const container = document.getElementById("branch-switcher");
+      const indicator = document.getElementById("seg-pill-indicator");
+      const activeBtn = container ? container.querySelector(".seg-btn.active") : null;
+      if (!container || !indicator || !activeBtn) return;
+
+      const left = activeBtn.offsetLeft;
+      const width = activeBtn.offsetWidth;
+      if (width > 0) {
+        container.classList.add("pill-ready");
+        indicator.style.width = `${width}px`;
+        indicator.style.transform = `translate3d(${left}px, 0, 0)`;
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      requestAnimationFrame(updateSegmentedPill);
+    });
+
+    function triggerDataSwitchAnim() {
+      const cards = document.querySelectorAll("#app-container .glass-card");
+      cards.forEach(c => {
+        c.classList.remove("animate-in", "data-switching");
+        void c.offsetWidth;
+        c.classList.add("data-switching");
+      });
+    }
+
+    // ==================== 1. LOGIN LOGICA ====================
+    const loginScreen = document.getElementById("login-screen");
+    const appContainer = document.getElementById("app-container");
+    const loginCardBox = document.getElementById("login-card-box");
+
+    function checkAuth() {
+      const isAuthed = localStorage.getItem("vr_auth") === "true" || sessionStorage.getItem("vr_auth") === "true";
+      if (isAuthed) {
+        loginScreen.style.display = "none";
+        appContainer.style.display = "block";
+        initDashboard();
+        requestAnimationFrame(() => {
+          updateSegmentedPill();
+          setTimeout(updateSegmentedPill, 120);
+        });
+      } else {
+        loginScreen.style.display = "flex";
+        appContainer.style.display = "none";
+      }
+    }
+
+    document.getElementById("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const u = document.getElementById("login-user").value.trim().toLowerCase();
+      const p = document.getElementById("login-pass").value;
+      const remember = document.getElementById("login-remember").checked;
+
+      if (u === AUTH_CONFIG.username.toLowerCase() && p === AUTH_CONFIG.password) {
+        if (remember) localStorage.setItem("vr_auth", "true");
+        else sessionStorage.setItem("vr_auth", "true");
+        document.getElementById("login-error").style.display = "none";
+        checkAuth();
+      } else {
+        document.getElementById("login-error").style.display = "block";
+        if (loginCardBox) {
+          loginCardBox.classList.remove("shake");
+          void loginCardBox.offsetWidth;
+          loginCardBox.classList.add("shake");
+        }
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("vr_auth");
+      sessionStorage.removeItem("vr_auth");
+      checkAuth();
+    });
+
+    // ==================== 2. NOTIFICATIE SYSTEEM ====================
+    const notifBtn = document.getElementById("notif-toggle-btn");
+    const notifLabel = document.getElementById("notif-label");
+
+    function updateNotifUI() {
+      const enabled = localStorage.getItem("vr_notif_enabled") === "true" && ("Notification" in window) && Notification.permission === "granted";
+      if (enabled) {
+        notifBtn.classList.add("notif-active");
+        notifLabel.textContent = "Meldingen aan";
+      } else {
+        notifBtn.classList.remove("notif-active");
+        notifLabel.textContent = "Meldingen";
+      }
+    }
+
+    notifBtn.addEventListener("click", async () => {
+      if (!("Notification" in window)) {
+        alert("Deze browser ondersteunt geen pushmeldingen.");
+        return;
+      }
+      if (localStorage.getItem("vr_notif_enabled") === "true") {
+        localStorage.setItem("vr_notif_enabled", "false");
+        updateNotifUI();
+        return;
+      }
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        localStorage.setItem("vr_notif_enabled", "true");
+        localStorage.setItem("vr_seen_version", appData.version || "");
+        updateNotifUI();
+        new Notification("Volvo Rutten • Meldingen actief", {
+          body: "Je ontvangt voortaan direct bericht zodra er een nieuw maandoverzicht op GitHub staat."
+        });
+      } else {
+        alert("Meldingen zijn geblokkeerd in je browserinstellingen.");
+      }
+    });
+
+    function triggerNewMonthAlert(newVersion, newMonthStr) {
+      const label = formatMonthLabel(newMonthStr);
+      const banner = document.getElementById("update-banner");
+      document.getElementById("update-banner-text").textContent = `Nieuw Maandoverzicht (${label}): Bekijk de resultaten van Volvo Rutten.`;
+      banner.style.display = "flex";
+
+      if (localStorage.getItem("vr_notif_enabled") === "true" && ("Notification" in window) && Notification.permission === "granted") {
+        new Notification("Nieuw Maandoverzicht: Bekijk de resultaten", {
+          body: `De nieuwste klanttevredenheid scores (${label}) van Volvo Rutten staan klaar.`
+        });
+      }
+      localStorage.setItem("vr_seen_version", newVersion);
+    }
+
+    // Controleer bij openen én elke 60 seconden of maandoverzichten/data.js op GitHub is bijgewerkt
+    function checkForRemoteDataUpdate() {
+      const oldScript = document.getElementById("dynamic-data-poll");
+      if (oldScript) oldScript.remove();
+
+      const script = document.createElement("script");
+      script.id = "dynamic-data-poll";
+      script.src = `maandoverzichten/data.js?v=${Date.now()}`;
+      script.onload = () => {
+        if (window.VOLVO_RUTTEN_DATA && window.VOLVO_RUTTEN_DATA.version) {
+          const seen = localStorage.getItem("vr_seen_version");
+          const incomingVersion = window.VOLVO_RUTTEN_DATA.version;
+          if (seen && seen !== incomingVersion) {
+            appData = window.VOLVO_RUTTEN_DATA;
+            populateMonthSelectors();
+            renderDashboard();
+            triggerNewMonthAlert(incomingVersion, appData.latestMonth);
+          } else if (!seen) {
+            localStorage.setItem("vr_seen_version", incomingVersion);
+          }
+        }
+      };
+      document.body.appendChild(script);
+    }
+
+    document.getElementById("view-latest-btn").addEventListener("click", () => {
+      if (appData.latestMonth) {
+        currentMonth = appData.latestMonth;
+        document.getElementById("month-selector").value = currentMonth;
+        triggerDataSwitchAnim();
+        renderDashboard();
+      }
+      document.getElementById("update-banner").style.display = "none";
+    });
+
+    document.getElementById("dismiss-banner-btn").addEventListener("click", () => {
+      document.getElementById("update-banner").style.display = "none";
+    });
+
+    // ==================== 3. BEREKENINGEN & DASHBOARD RENDERING ====================
+    function formatMonthLabel(ym) {
+      if (!ym || !ym.includes("-")) return ym || "Onbekend";
+      const [y, m] = ym.split("-");
+      return `${MONTH_NAMES_NL[m] || m} ${y}`;
+    }
+
+    function formatShortMonth(ym) {
+      if (!ym || !ym.includes("-")) return ym || "";
+      const [y, m] = ym.split("-");
+      return (MONTH_NAMES_NL[m] || m).slice(0, 3);
+    }
+
+    function formatPct(val) {
+      if (val === null || val === undefined || isNaN(val)) return "--%";
+      return val.toFixed(1).replace(".", ",") + "%";
+    }
+
+    function getAvailableMonths() {
+      const set = new Set((appData.responses || []).map(r => r.month).filter(Boolean));
+      return Array.from(set).sort().reverse();
+    }
+
+    function populateMonthSelectors() {
+      const months = getAvailableMonths();
+      const mainSel = document.getElementById("month-selector");
+      const adminSel = document.getElementById("admin-target-month");
+      mainSel.innerHTML = "";
+      adminSel.innerHTML = "";
+
+      months.forEach(m => {
+        const opt1 = document.createElement("option");
+        opt1.value = m;
+        opt1.textContent = formatMonthLabel(m);
+        mainSel.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = m;
+        opt2.textContent = formatMonthLabel(m);
+        adminSel.appendChild(opt2);
+      });
+
+      if (months.includes(appData.latestMonth)) currentMonth = appData.latestMonth;
+      else if (months.length > 0) currentMonth = months[0];
+
+      mainSel.value = currentMonth;
+      adminSel.value = currentMonth;
+    }
+
+    function calcMetrics(rows) {
+      if (!rows || rows.length === 0) {
+        return { count: 0, osat: null, begrip: null, toelichting: null, rftit: null, tens: 0, unhappy: 0 };
+      }
+      const validOsat = rows.filter(r => typeof r.osat === "number" && !isNaN(r.osat));
+      const top2 = validOsat.filter(r => r.osat >= 9).length;
+      const tens = validOsat.filter(r => r.osat === 10).length;
+      const unhappy = validOsat.filter(r => r.osat <= 6).length;
+
+      const validBegrip = rows.filter(r => typeof r.begrip === "number" && !isNaN(r.begrip));
+      const topBegrip = validBegrip.filter(r => r.begrip === 5).length;
+
+      const validToel = rows.filter(r => typeof r.toelichting === "number" && !isNaN(r.toelichting));
+      const topToel = validToel.filter(r => r.toelichting === 5).length;
+
+      const validRftit = rows.filter(r => typeof r.rftit === "boolean");
+      const topRftit = validRftit.filter(r => r.rftit === true).length;
+
+      return {
+        count: rows.length,
+        osat: validOsat.length ? (top2 / validOsat.length) * 100 : null,
+        begrip: validBegrip.length ? (topBegrip / validBegrip.length) * 100 : null,
+        toelichting: validToel.length ? (topToel / validToel.length) * 100 : null,
+        rftit: validRftit.length ? (topRftit / validRftit.length) * 100 : null,
+        tens,
+        unhappy
+      };
+    }
+
+    function getChipClass(val, target) {
+      if (val === null || isNaN(val)) return "";
+      if (val >= target) return "chip-green";
+      if (val >= target - 5) return "chip-amber";
+      return "chip-red";
+    }
+
+    function getBarColor(val, target) {
+      if (val === null || isNaN(val)) return "var(--text-muted)";
+      if (val >= target) return "var(--green-bright)";
+      if (val >= target - 5) return "#f59e0b";
+      return "#ef4444";
+    }
+
+    function selectBranch(branchName) {
+      if (!branchName) return;
+      currentBranch = branchName;
+      document.querySelectorAll(".seg-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.branch === branchName);
+      });
+      updateSegmentedPill();
+      triggerDataSwitchAnim();
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const months = getAvailableMonths();
+      const idx = months.indexOf(currentMonth);
+      const prevMonth = idx >= 0 && idx + 1 < months.length ? months[idx + 1] : null;
+      const currentYear = (currentMonth || "2026").split("-")[0];
+
+      const allResponses = appData.responses || [];
+      const filterByBranch = (r) => currentBranch === "Totaal" || r.branch === currentBranch;
+
+      const monthRows = allResponses.filter(r => r.month === currentMonth && filterByBranch(r));
+      const prevRows = prevMonth ? allResponses.filter(r => r.month === prevMonth && filterByBranch(r)) : [];
+      const ytdRows = allResponses.filter(r => r.year === currentYear && r.month <= currentMonth && filterByBranch(r));
+
+      const mStats = calcMetrics(monthRows);
+      const pStats = calcMetrics(prevRows);
+      const yStats = calcMetrics(ytdRows);
+
+      // Header
+      const branchTitle = currentBranch === "Totaal" ? "Volvo Rutten (Totaal)" : `Volvo Rutten — ${currentBranch}`;
+      document.getElementById("dashboard-heading").textContent = `${branchTitle} • ${formatMonthLabel(currentMonth)}`;
+      animateValue(document.getElementById("respondent-badge"), mStats.count, v => `${Math.round(v || 0)} respondenten`, 520);
+      animateValue(document.getElementById("tens-total-badge"), mStats.tens, v => `${Math.round(v || 0)}× een 10`, 520);
+
+      // Card 1: OSAT met vloeiende teller en cirkel-animatie
+      animateValue(document.getElementById("kpi-osat"), mStats.osat, formatPct, 750);
+      animateValue(document.getElementById("kpi-osat-ytd"), yStats.osat, formatPct, 750);
+
+      const ringCircle = document.getElementById("osat-ring-circle");
+      const circumference = 188.5;
+      const pct = mStats.osat || 0;
+      requestAnimationFrame(() => {
+        ringCircle.style.strokeDashoffset = circumference - (pct / 100) * circumference;
+        ringCircle.style.stroke = pct >= 67 ? "#22c55e" : pct >= 62 ? "#f5c400" : "#f87171";
+      });
+
+      const deltaEl = document.getElementById("kpi-osat-delta");
+      if (mStats.osat !== null && pStats.osat !== null) {
+        const diff = mStats.osat - pStats.osat;
+        const sign = diff > 0 ? "+" : "";
+        deltaEl.textContent = `${sign}${diff.toFixed(1).replace(".", ",")}%`;
+        deltaEl.className = "delta-pill " + (diff > 0.05 ? "delta-up" : diff < -0.05 ? "delta-down" : "delta-neutral");
+      } else {
+        deltaEl.textContent = "n.v.t.";
+        deltaEl.className = "delta-pill delta-neutral";
+      }
+
+      // Card 2 & 3: Landelijke Positie
+      const rankObj = (appData.nationalRanks && appData.nationalRanks[currentMonth] && appData.nationalRanks[currentMonth][currentBranch]) || {};
+      const prevRankObj = (prevMonth && appData.nationalRanks && appData.nationalRanks[prevMonth] && appData.nationalRanks[prevMonth][currentBranch]) || {};
+
+      const mRank = rankObj.monthRank;
+      const cRank = rankObj.cumRank;
+      document.getElementById("kpi-rank-month").innerHTML = `#<strong id="kpi-rank-month-num">${mRank || "--"}</strong><span> / 82</span>`;
+      document.getElementById("kpi-rank-cum").innerHTML = `#<strong id="kpi-rank-cum-num">${cRank || "--"}</strong><span> / 82</span>`;
+      if (mRank) animateValue(document.getElementById("kpi-rank-month-num"), mRank, v => String(Math.round(v)), 620);
+      if (cRank) animateValue(document.getElementById("kpi-rank-cum-num"), cRank, v => String(Math.round(v)), 620);
+
+      const rankDeltaEl = document.getElementById("kpi-rank-delta");
+      if (mRank && prevRankObj.monthRank) {
+        const rDiff = prevRankObj.monthRank - mRank; // Positief = gestegen op ranglijst!
+        const sign = rDiff > 0 ? "+" : "";
+        rankDeltaEl.textContent = rDiff === 0 ? "Gelijk" : `${sign}${rDiff} plekken`;
+        rankDeltaEl.className = "delta-pill " + (rDiff > 0 ? "delta-light-up" : rDiff < 0 ? "delta-light-down" : "delta-light-neutral");
+      } else {
+        rankDeltaEl.textContent = "n.v.t.";
+        rankDeltaEl.className = "delta-pill delta-light-neutral";
+      }
+
+      const top20Pill = document.getElementById("top20-status-pill");
+      if (cRank && cRank <= 20) {
+        top20Pill.textContent = "🎯 We zitten in de Top 20!";
+        top20Pill.className = "delta-pill delta-light-up";
+      } else if (cRank) {
+        top20Pill.textContent = `🎯 Nog ${cRank - 20} plekken tot Top 20`;
+        top20Pill.className = "delta-pill delta-light-neutral";
+      } else {
+        top20Pill.textContent = "🎯 Doel: Top 20 van Nederland";
+        top20Pill.className = "delta-pill delta-light-neutral";
+      }
+
+      // Card 4: CSA KPI's met geanimeerde balken en tellers
+      animateValue(document.getElementById("kpi-begrip-val"), mStats.begrip, formatPct, 700);
+      document.getElementById("kpi-begrip-bar").style.width = `${Math.min(100, mStats.begrip || 0)}%`;
+      document.getElementById("kpi-begrip-bar").style.background = getBarColor(mStats.begrip, 69);
+
+      animateValue(document.getElementById("kpi-toelichting-val"), mStats.toelichting, formatPct, 700);
+      document.getElementById("kpi-toelichting-bar").style.width = `${Math.min(100, mStats.toelichting || 0)}%`;
+      document.getElementById("kpi-toelichting-bar").style.background = getBarColor(mStats.toelichting, 66);
+
+      animateValue(document.getElementById("kpi-rftit-val"), mStats.rftit, formatPct, 700);
+      document.getElementById("kpi-rftit-bar").style.width = `${Math.min(100, mStats.rftit || 0)}%`;
+      document.getElementById("kpi-rftit-bar").style.background = getBarColor(mStats.rftit, 93);
+
+      // Customer Hero (PST met meeste 10'en in geselecteerde maand & vestiging)
+      const pstMap = {};
+      monthRows.forEach(r => {
+        const name = (r.pst || "").trim();
+        if (!name || name.toLowerCase() === "onbekend") return;
+        if (!pstMap[name]) pstMap[name] = { name, branch: r.branch, tens: 0, top2: 0, total: 0 };
+        pstMap[name].total += 1;
+        if (r.osat === 10) pstMap[name].tens += 1;
+        if (r.osat >= 9) pstMap[name].top2 += 1;
+      });
+
+      const pstRanking = Object.values(pstMap).sort((a, b) => {
+        if (b.tens !== a.tens) return b.tens - a.tens;
+        const osatA = a.total ? a.top2 / a.total : 0;
+        const osatB = b.total ? b.top2 / b.total : 0;
+        if (osatB !== osatA) return osatB - osatA;
+        return b.total - a.total;
+      });
+
+      const lbEl = document.getElementById("pst-leaderboard-list");
+      lbEl.innerHTML = "";
+
+      if (pstRanking.length > 0) {
+        const winner = pstRanking[0];
+        const initials = winner.name.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
+        const winOsat = ((winner.top2 / winner.total) * 100).toFixed(0);
+        document.getElementById("hero-initials").innerHTML = `${initials}<span class="hero-crown">👑</span>`;
+        document.getElementById("hero-name").textContent = winner.name;
+        document.getElementById("hero-branch-meta").textContent = `Vestiging ${winner.branch} • ${winner.tens}× een 10 (${winner.total} reacties)`;
+        document.getElementById("hero-osat-meta").textContent = `${winOsat}% OSAT • Maandwinnaar Bol.com bon!`;
+
+        // Zoek een mooie klantquote voor deze winnaar (indien aanwezig)
+        const winnerQuotes = monthRows.filter(r =>
+          (r.pst || "").trim().toLowerCase() === winner.name.toLowerCase() &&
+          r.osat >= 9 &&
+          r.comment &&
+          r.comment.trim().length > 8 &&
+          !["nee", "geen", "nvt", "n.v.t."].includes(r.comment.trim().toLowerCase())
+        );
+        const bestQuote = winnerQuotes.length > 0
+          ? `“${winnerQuotes[0].comment.trim()}”`
+          : `Bedankt voor jouw geweldige inzet, gastvrijheid en vakmanschap voor onze Volvo-klanten!`;
+
+        window.currentHeroData = {
+          name: winner.name,
+          initials,
+          branch: winner.branch,
+          monthLabel: formatMonthLabel(currentMonth),
+          tens: winner.tens,
+          total: winner.total,
+          osat: `${winOsat}%`,
+          quote: bestQuote
+        };
+
+        pstRanking.slice(0, 5).forEach((p, i) => {
+          const pOsat = ((p.top2 / p.total) * 100).toFixed(0);
+          const row = document.createElement("div");
+          row.className = "pst-row";
+          row.innerHTML = `
+            <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <span class="pst-rank-badge">${i + 1}</span>
+              <strong>${p.name}</strong>
+              <span style="font-size: 0.78rem; color: var(--text-muted); margin-left: 6px;">${p.branch} • ${pOsat}% OSAT</span>
+            </div>
+            <span class="tens-pill">${p.tens}× 10</span>
+          `;
+          lbEl.appendChild(row);
+        });
+      } else {
+        document.getElementById("hero-name").textContent = "Nog geen PST-data";
+        document.getElementById("hero-branch-meta").textContent = "Upload een Excel-bestand met WerknemerID";
+        document.getElementById("hero-osat-meta").textContent = "—";
+        window.currentHeroData = {
+          name: "Customer Hero",
+          initials: "CH",
+          branch: currentBranch === "Totaal" ? "Volvo Rutten" : currentBranch,
+          monthLabel: formatMonthLabel(currentMonth),
+          tens: 0,
+          total: 0,
+          osat: "--%",
+          quote: "Bedankt voor jouw geweldige inzet, gastvrijheid en vakmanschap voor onze Volvo-klanten!"
+        };
+      }
+
+      // Vestigingen Vergelijkingstabel (klikbaar per vestiging)
+      const tbody = document.getElementById("branch-comparison-tbody");
+      tbody.innerHTML = "";
+      ["Totaal", "Echt", "Venlo", "Boxmeer"].forEach(bName => {
+        const bRows = allResponses.filter(r => r.month === currentMonth && (bName === "Totaal" || r.branch === bName));
+        const st = calcMetrics(bRows);
+        const tr = document.createElement("tr");
+        if (bName === currentBranch) tr.className = "active-branch-row";
+        tr.title = `Klik om te filteren op ${bName === "Totaal" ? "Rutten Totaal" : bName}`;
+        tr.addEventListener("click", () => selectBranch(bName));
+        tr.innerHTML = `
+          <td><strong>${bName === "Totaal" ? "Rutten Totaal" : bName}</strong></td>
+          <td><span class="kpi-chip ${getChipClass(st.osat, 67)}">${formatPct(st.osat)}</span></td>
+          <td><span class="kpi-chip ${getChipClass(st.begrip, 69)}">${formatPct(st.begrip)}</span></td>
+          <td><span class="kpi-chip ${getChipClass(st.toelichting, 66)}">${formatPct(st.toelichting)}</span></td>
+          <td><span class="kpi-chip ${getChipClass(st.rftit, 93)}">${formatPct(st.rftit)}</span></td>
+          <td>${st.count}</td>
+          <td><strong>${st.tens}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Historische Strip (laatste 3 maanden + Cumulatief Jaar)
+      const histStrip = document.getElementById("month-history-strip");
+      histStrip.innerHTML = "";
+      const recent3 = months.slice(idx >= 0 ? idx : 0, (idx >= 0 ? idx : 0) + 3);
+      recent3.forEach(m => {
+        const rRows = allResponses.filter(r => r.month === m && filterByBranch(r));
+        const rSt = calcMetrics(rRows);
+        const div = document.createElement("div");
+        div.className = "history-pill";
+        div.title = `Bekijk ${formatMonthLabel(m)}`;
+        div.addEventListener("click", () => {
+          currentMonth = m;
+          document.getElementById("month-selector").value = m;
+          triggerDataSwitchAnim();
+          renderDashboard();
+        });
+        div.innerHTML = `
+          <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 600;">${formatShortMonth(m)} ${m.split("-")[0]}</div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: var(--volvo-navy); margin-top: 3px;">${formatPct(rSt.osat)}</div>
+        `;
+        histStrip.appendChild(div);
+      });
+      const ytdDiv = document.createElement("div");
+      ytdDiv.className = "history-pill ytd";
+      ytdDiv.innerHTML = `
+        <div style="font-size: 0.74rem; color: var(--volvo-navy); font-weight: 700;">Cum. ${currentYear}</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: var(--volvo-navy); margin-top: 3px;">${formatPct(yStats.osat)}</div>
+      `;
+      histStrip.appendChild(ytdDiv);
+
+      // Reviews (Top & Tip)
+      currentTopReviews = monthRows.filter(r => r.osat >= 9 && r.comment && r.comment.trim().length > 6 && !["nee", "geen", "nvt", "n.v.t."].includes(r.comment.trim().toLowerCase()));
+      currentTipReviews = monthRows.filter(r => r.osat <= 8 && r.comment && r.comment.trim().length > 6 && !["nee", "geen", "nvt", "n.v.t."].includes(r.comment.trim().toLowerCase()));
+      topReviewIdx = 0;
+      tipReviewIdx = 0;
+      renderReviews();
+
+      // Tip van de Maand & Focuspunten
+      const tip = appData.tipOfTheMonth || {};
+      document.getElementById("tip-month-quote").textContent = `“${tip.quote || "Doe alsof het je eigen auto is"}”`;
+      document.getElementById("tip-month-body").textContent = tip.body || "";
+      document.getElementById("tip-month-author").textContent = tip.author || "Customer Champion";
+
+      const leftList = document.getElementById("focus-list-left");
+      const rightList = document.getElementById("focus-list-right");
+      leftList.innerHTML = (appData.focusPointsLeft || []).map(f => `<li><strong>${f.title}</strong>${f.text}</li>`).join("");
+      rightList.innerHTML = (appData.focusPointsRight || []).map(f => `<li><strong>${f.title}</strong>${f.text}</li>`).join("");
+    }
+
+    function animateQuoteBox(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("quote-anim");
+      void el.offsetWidth;
+      el.classList.add("quote-anim");
+    }
+
+    function renderReviews(which) {
+      if (!which || which === "top") {
+        if (currentTopReviews.length > 0) {
+          const r = currentTopReviews[topReviewIdx % currentTopReviews.length];
+          document.getElementById("top-review-quote").textContent = `“${r.comment}”`;
+          document.getElementById("top-review-meta").textContent = `Score ${r.osat}/10 • ${r.branch} (${r.pst || "Service"}) • ${topReviewIdx + 1}/${currentTopReviews.length}`;
+        } else {
+          document.getElementById("top-review-quote").textContent = "“Geen opmerkingen met score 9 of 10 in deze selectie.”";
+          document.getElementById("top-review-meta").textContent = "0 reviews";
+        }
+        if (which === "top") animateQuoteBox("top-review-quote");
+      }
+
+      if (!which || which === "tip") {
+        if (currentTipReviews.length > 0) {
+          const r = currentTipReviews[tipReviewIdx % currentTipReviews.length];
+          document.getElementById("tip-review-quote").textContent = `“${r.comment}”`;
+          document.getElementById("tip-review-meta").textContent = `Score ${r.osat}/10 • ${r.branch} (${r.pst || "Service"}) • ${tipReviewIdx + 1}/${currentTipReviews.length}`;
+        } else {
+          document.getElementById("tip-review-quote").textContent = "“Geen verbeterpunten gemeld in deze selectie!”";
+          document.getElementById("tip-review-meta").textContent = "0 tips";
+        }
+        if (which === "tip") animateQuoteBox("tip-review-quote");
+      }
+    }
+
+    document.getElementById("prev-top-review").addEventListener("click", () => {
+      if (currentTopReviews.length) { topReviewIdx = (topReviewIdx - 1 + currentTopReviews.length) % currentTopReviews.length; renderReviews("top"); }
+    });
+    document.getElementById("next-top-review").addEventListener("click", () => {
+      if (currentTopReviews.length) { topReviewIdx = (topReviewIdx + 1) % currentTopReviews.length; renderReviews("top"); }
+    });
+    document.getElementById("prev-tip-review").addEventListener("click", () => {
+      if (currentTipReviews.length) { tipReviewIdx = (tipReviewIdx - 1 + currentTipReviews.length) % currentTipReviews.length; renderReviews("tip"); }
+    });
+    document.getElementById("next-tip-review").addEventListener("click", () => {
+      if (currentTipReviews.length) { tipReviewIdx = (tipReviewIdx + 1) % currentTipReviews.length; renderReviews("tip"); }
+    });
+
+    // Mobile Swipe ondersteuning voor Review kaarten
+    function attachSwipeReview(cardId, onPrev, onNext) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      let startX = 0;
+      let startY = 0;
+      card.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+      card.addEventListener("touchend", (e) => {
+        if (e.changedTouches.length === 1) {
+          const dx = e.changedTouches[0].clientX - startX;
+          const dy = e.changedTouches[0].clientY - startY;
+          if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+            if (dx < 0) onNext();
+            else onPrev();
+          }
+        }
+      }, { passive: true });
+    }
+
+    attachSwipeReview(
+      "top-review-card",
+      () => document.getElementById("prev-top-review").click(),
+      () => document.getElementById("next-top-review").click()
+    );
+    attachSwipeReview(
+      "tip-review-card",
+      () => document.getElementById("prev-tip-review").click(),
+      () => document.getElementById("next-tip-review").click()
+    );
+
+    // Branch & Month Switchers
+    document.querySelectorAll(".seg-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectBranch(btn.dataset.branch);
+      });
+    });
+
+    document.getElementById("month-selector").addEventListener("change", (e) => {
+      currentMonth = e.target.value;
+      triggerDataSwitchAnim();
+      renderDashboard();
+    });
+
+    // ==================== 4. EXCEL PARSER & ADMIN UPLOAD STUDIO ====================
+    const uploadModal = document.getElementById("upload-modal");
+    document.getElementById("open-upload-btn").addEventListener("click", () => {
+      syncAdminModalFields();
+      uploadModal.style.display = "flex";
+    });
+    document.getElementById("close-upload-btn").addEventListener("click", () => {
+      uploadModal.style.display = "none";
+    });
+    uploadModal.addEventListener("click", (e) => {
+      if (e.target === uploadModal) uploadModal.style.display = "none";
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && uploadModal.style.display === "flex") {
+        uploadModal.style.display = "none";
+      }
+    });
+
+    function syncAdminModalFields() {
+      const targetM = document.getElementById("admin-target-month").value || currentMonth;
+      const ranks = (appData.nationalRanks && appData.nationalRanks[targetM]) || {};
+      ["Echt", "Venlo", "Boxmeer"].forEach(b => {
+        document.getElementById(`rank-${b}-month`).value = (ranks[b] && ranks[b].monthRank) || "";
+        document.getElementById(`rank-${b}-cum`).value = (ranks[b] && ranks[b].cumRank) || "";
+      });
+      const tip = appData.tipOfTheMonth || {};
+      document.getElementById("admin-tip-quote").value = tip.quote || "";
+      document.getElementById("admin-tip-author").value = tip.author || "";
+      document.getElementById("admin-tip-body").value = tip.body || "";
+
+      // Laad opgeslagen GitHub instellingen
+      document.getElementById("gh-repo").value = localStorage.getItem("vr_gh_repo") || "";
+      document.getElementById("gh-branch").value = localStorage.getItem("vr_gh_branch") || "main";
+      document.getElementById("gh-token").value = localStorage.getItem("vr_gh_token") || "";
+    }
+
+    document.getElementById("admin-target-month").addEventListener("change", syncAdminModalFields);
+
+    // Drag & drop Excel
+    const dropzone = document.getElementById("excel-dropzone");
+    const fileInput = document.getElementById("excel-file-input");
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleExcelFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) handleExcelFile(e.target.files[0]);
+    });
+
+    function parseExcelDate(raw) {
+      if (!raw) return null;
+      if (typeof raw === "number") {
+        // Excel serial date
+        const utcDays = Math.floor(raw - 25569);
+        const d = new Date(utcDays * 86400 * 1000);
+        if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+      }
+      const str = String(raw).trim();
+      // YYYY-MM-DD
+      const isoMatch = str.match(/^(\d{4})[-/](\d{2})[-/](\d{2})/);
+      if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+      // DD-MM-YYYY
+      const euMatch = str.match(/^(\d{2})[-/](\d{2})[-/](\d{4})/);
+      if (euMatch) return `${euMatch[3]}-${euMatch[2]}-${euMatch[1]}`;
+      return null;
+    }
+
+    function handleExcelFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+          // Vind de echte headerrij (in Medallia export staat die meestal op rij 3 / index 2)
+          let headerIdx = rows.findIndex(r => r.some(c => String(c).trim() === "Reactie datum" || String(c).trim() === "Enquête ID"));
+          if (headerIdx === -1) headerIdx = 0;
+          const headers = rows[headerIdx].map(h => String(h).trim());
+
+          // Helper om alle kolom-indices met dezelfde naam te vinden (Medallia gebruikt soms dubbele kolomkoppen)
+          const findCols = (names) => {
+            const indices = [];
+            headers.forEach((h, i) => {
+              if (names.some(n => h.toLowerCase() === n.toLowerCase())) indices.push(i);
+            });
+            return indices;
+          };
+
+          const getFirstVal = (row, indices) => {
+            for (const i of indices) {
+              const v = row[i];
+              if (v !== "" && v !== null && v !== undefined) return v;
+            }
+            return "";
+          };
+
+          const colId = findCols(["Enquête ID"]);
+          const colDate = findCols(["Reactie datum", "Lokale reactiedatum"]);
+          const colEvent = findCols(["Type evenement"]);
+          const colPst = findCols(["WerknemerID", "Werknemer ID"]);
+          const colRetailer = findCols(["Retailer Name", "Retailer Naam"]);
+          const colDealer = findCols(["Dealer code"]);
+          const colOsat = findCols(["Algemene tevredenheid"]);
+          const colComment = findCols(["Opmerking"]);
+          const colBegrip = findCols(["Begrip dealer medewerker van klantbehoeftes", "Begrip"]);
+          const colToel = findCols(["Ontvangen toelichting"]);
+          const colRftit = findCols(["Right First Time In Time (RFTIT)"]);
+          const colExcluded = findCols(["Response Excluded?"]);
+
+          const parsed = [];
+          for (let r = headerIdx + 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || row.length === 0) continue;
+
+            const excluded = String(getFirstVal(row, colExcluded)).trim().toLowerCase();
+            if (excluded === "ja" || excluded === "yes" || excluded === "true") continue;
+
+            const eventType = String(getFirstVal(row, colEvent)).trim().toLowerCase();
+            if (eventType && eventType !== "service") continue;
+
+            const dateStr = parseExcelDate(getFirstVal(row, colDate));
+            if (!dateStr) continue;
+
+            const dealerCode = String(getFirstVal(row, colDealer)).trim();
+            const retailerStr = String(getFirstVal(row, colRetailer)).trim();
+            let branch = DEALER_MAP[dealerCode] || "";
+            if (!branch) {
+              if (retailerStr.toLowerCase().includes("echt")) branch = "Echt";
+              else if (retailerStr.toLowerCase().includes("venlo")) branch = "Venlo";
+              else if (retailerStr.toLowerCase().includes("boxmeer")) branch = "Boxmeer";
+              else branch = "Onbekend";
+            }
+
+            let pstRaw = String(getFirstVal(row, colPst)).trim();
+            // Strip eventuele " - 6NL178800" suffix uit WerknemerID
+            pstRaw = pstRaw.replace(/\s*-\s*6NL\d+/i, "").trim();
+
+            const osatVal = parseFloat(String(getFirstVal(row, colOsat)).replace(",", "."));
+            const begripVal = parseFloat(String(getFirstVal(row, colBegrip)).replace(",", "."));
+            const toelVal = parseFloat(String(getFirstVal(row, colToel)).replace(",", "."));
+            const rftitRaw = String(getFirstVal(row, colRftit)).trim().toLowerCase();
+            const rftitBool = rftitRaw === "ja" || rftitRaw === "yes" ? true : (rftitRaw === "nee" || rftitRaw === "no" ? false : null);
+
+            parsed.push({
+              id: String(getFirstVal(row, colId) || r),
+              date: dateStr,
+              month: dateStr.slice(0, 7),
+              year: dateStr.slice(0, 4),
+              branch,
+              dealerCode,
+              pst: pstRaw,
+              osat: isNaN(osatVal) ? null : osatVal,
+              begrip: isNaN(begripVal) ? null : begripVal,
+              toelichting: isNaN(toelVal) ? null : toelVal,
+              rftit: rftitBool,
+              comment: String(getFirstVal(row, colComment)).trim()
+            });
+          }
+
+          if (parsed.length === 0) {
+            document.getElementById("upload-parse-status").style.color = "var(--red)";
+            document.getElementById("upload-parse-status").textContent = "Geen geldige Service-rijen gevonden in dit bestand. Controleer of je de One Voice Antwoorden-export gebruikt.";
+            return;
+          }
+
+          appData.responses = parsed;
+          const uniqueMonths = Array.from(new Set(parsed.map(p => p.month))).sort().reverse();
+          appData.latestMonth = uniqueMonths[0];
+          currentMonth = appData.latestMonth;
+
+          populateMonthSelectors();
+          syncAdminModalFields();
+
+          document.getElementById("upload-parse-status").style.color = "var(--green)";
+          document.getElementById("upload-parse-status").textContent = `✅ ${parsed.length} Service-reacties succesvol verwerkt (${uniqueMonths.length} maanden, nieuwste: ${formatMonthLabel(appData.latestMonth)}).`;
+        } catch (err) {
+          console.error(err);
+          document.getElementById("upload-parse-status").style.color = "var(--red)";
+          document.getElementById("upload-parse-status").textContent = "Fout bij lezen van Excel-bestand: " + err.message;
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function buildFinalDataObject() {
+      const targetM = document.getElementById("admin-target-month").value || currentMonth;
+      if (!appData.nationalRanks) appData.nationalRanks = {};
+      if (!appData.nationalRanks[targetM]) appData.nationalRanks[targetM] = {};
+
+      const mRanks = [];
+      const cRanks = [];
+      ["Echt", "Venlo", "Boxmeer"].forEach(b => {
+        const mVal = parseInt(document.getElementById(`rank-${b}-month`).value, 10);
+        const cVal = parseInt(document.getElementById(`rank-${b}-cum`).value, 10);
+        appData.nationalRanks[targetM][b] = {
+          monthRank: isNaN(mVal) ? null : mVal,
+          cumRank: isNaN(cVal) ? null : cVal
+        };
+        if (!isNaN(mVal)) mRanks.push(mVal);
+        if (!isNaN(cVal)) cRanks.push(cVal);
+      });
+
+      // Bereken gemiddelde landelijke positie voor Totaal Rutten
+      appData.nationalRanks[targetM]["Totaal"] = {
+        monthRank: mRanks.length ? Math.round(mRanks.reduce((a, b) => a + b, 0) / mRanks.length) : null,
+        cumRank: cRanks.length ? Math.round(cRanks.reduce((a, b) => a + b, 0) / cRanks.length) : null
+      };
+
+      appData.tipOfTheMonth = {
+        quote: document.getElementById("admin-tip-quote").value.trim() || "Doe alsof het je eigen auto is",
+        author: document.getElementById("admin-tip-author").value.trim() || "Customer Champion",
+        body: document.getElementById("admin-tip-body").value.trim() || ""
+      };
+
+      appData.latestMonth = targetM;
+      appData.version = new Date().toISOString();
+      return appData;
+    }
+
+    function generateDataJsString() {
+      const obj = buildFinalDataObject();
+      return `// Automatisch gegenereerd door Volvo Rutten Customer Champion Dashboard\n// Plaats dit bestand in de map: maandoverzichten/data.js op GitHub\nwindow.VOLVO_RUTTEN_DATA = ${JSON.stringify(obj, null, 2)};\n`;
+    }
+
+    // Knop 1: Preview direct in dashboard
+    document.getElementById("apply-preview-btn").addEventListener("click", () => {
+      buildFinalDataObject();
+      currentMonth = appData.latestMonth;
+      document.getElementById("month-selector").value = currentMonth;
+      renderDashboard();
+      uploadModal.style.display = "none";
+    });
+
+    // Knop 2: Download data.js voor handmatige drag-and-drop naar GitHub map 'maandoverzichten/'
+    document.getElementById("download-datajs-btn").addEventListener("click", () => {
+      const content = generateDataJsString();
+      const blob = new Blob([content], { type: "application/javascript;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "data.js";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      currentMonth = appData.latestMonth;
+      document.getElementById("month-selector").value = currentMonth;
+      renderDashboard();
+    });
+
+    // Knop 3: 1-Klik Direct naar GitHub API pushen
+    document.getElementById("push-github-btn").addEventListener("click", async () => {
+      const repo = document.getElementById("gh-repo").value.trim();
+      const branch = document.getElementById("gh-branch").value.trim() || "main";
+      const token = document.getElementById("gh-token").value.trim();
+      const statusEl = document.getElementById("gh-push-status");
+
+      if (!repo || !token) {
+        statusEl.style.color = "var(--red)";
+        statusEl.textContent = "Vul eerst je GitHub repository (gebruiker/repo) en token in.";
+        return;
+      }
+
+      localStorage.setItem("vr_gh_repo", repo);
+      localStorage.setItem("vr_gh_branch", branch);
+      localStorage.setItem("vr_gh_token", token);
+
+      statusEl.style.color = "var(--volvo-navy)";
+      statusEl.textContent = "⏳ Bezig met uploaden naar GitHub (maandoverzichten/data.js)...";
+
+      const path = "maandoverzichten/data.js";
+      const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+      const contentStr = generateDataJsString();
+      const base64Content = btoa(unescape(encodeURIComponent(contentStr)));
+
+      try {
+        // Haal eerst de huidige file SHA op (indien bestand al bestaat)
+        let sha = null;
+        const getRes = await fetch(`${apiUrl}?ref=${branch}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" }
+        });
+        if (getRes.ok) {
+          const existing = await getRes.json();
+          sha = existing.sha;
+        }
+
+        const putBody = {
+          message: `Update maandoverzicht ${formatMonthLabel(appData.latestMonth)}`,
+          content: base64Content,
+          branch
+        };
+        if (sha) putBody.sha = sha;
+
+        const putRes = await fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(putBody)
+        });
+
+        if (!putRes.ok) {
+          const errJson = await putRes.json();
+          throw new Error(errJson.message || `HTTP ${putRes.status}`);
+        }
+
+        statusEl.style.color = "var(--green)";
+        statusEl.textContent = "✅ Gepubliceerd! GitHub Pages werkt het dashboard binnen ~30 seconden automatisch bij.";
+        renderDashboard();
+      } catch (err) {
+        statusEl.style.color = "var(--red)";
+        statusEl.textContent = "❌ GitHub upload mislukt: " + err.message;
+      }
+    });
+
+    // ==================== 5. CADEAUBON STUDIO & A4 PDF GENERATOR ====================
+    const voucherModal = document.getElementById("voucher-modal");
+    const openVoucherBtn = document.getElementById("open-voucher-btn");
+    const closeVoucherBtn = document.getElementById("close-voucher-btn");
+    const giftCardBol = document.getElementById("gift-card-bol");
+    const giftCardCustom = document.getElementById("gift-card-custom");
+    const customGiftBox = document.getElementById("custom-gift-box");
+    const customGiftInput = document.getElementById("voucher-custom-gift");
+    const winnerNameInput = document.getElementById("voucher-winner-name");
+    const winnerBranchInput = document.getElementById("voucher-winner-branch");
+    const personalNoteInput = document.getElementById("voucher-personal-note");
+    const downloadVoucherPdfBtn = document.getElementById("download-voucher-pdf-btn");
+    const voucherPreviewCanvas = document.getElementById("voucher-preview-canvas");
+    const voucherDownloadStatus = document.getElementById("voucher-download-status");
+
+    let selectedGiftType = "bol";
+    const cachedLogoImg = new Image();
+    cachedLogoImg.src = OFFICIAL_LOGO_DATA_URI;
+    cachedLogoImg.onload = () => {
+      if (voucherModal && voucherModal.style.display === "flex") {
+        drawA4VoucherCanvas();
+      }
+    };
+
+    function setGiftType(type) {
+      selectedGiftType = type;
+      giftCardBol.classList.toggle("selected", type === "bol");
+      giftCardCustom.classList.toggle("selected", type === "custom");
+      customGiftBox.style.display = type === "custom" ? "block" : "none";
+      if (type === "custom" && !customGiftInput.value.trim()) {
+        customGiftInput.focus();
+      }
+      drawA4VoucherCanvas();
+    }
+
+    giftCardBol.addEventListener("click", () => setGiftType("bol"));
+    giftCardCustom.addEventListener("click", () => setGiftType("custom"));
+    [customGiftInput, winnerNameInput, winnerBranchInput, personalNoteInput].forEach(inp => {
+      inp.addEventListener("input", () => drawA4VoucherCanvas());
+    });
+
+    openVoucherBtn.addEventListener("click", () => {
+      const h = window.currentHeroData || {
+        name: document.getElementById("hero-name").textContent || "Customer Hero",
+        initials: "CH",
+        branch: currentBranch === "Totaal" ? "Volvo Rutten" : currentBranch,
+        monthLabel: formatMonthLabel(currentMonth),
+        tens: 0,
+        total: 0,
+        osat: "--%",
+        quote: "Bedankt voor jouw geweldige inzet, gastvrijheid en vakmanschap voor onze Volvo-klanten!"
+      };
+      winnerNameInput.value = h.name;
+      winnerBranchInput.value = `Vestiging ${h.branch} • ${h.monthLabel}`;
+      personalNoteInput.value = h.quote;
+      voucherDownloadStatus.textContent = "";
+      setGiftType("bol");
+      voucherModal.style.display = "flex";
+      requestAnimationFrame(() => drawA4VoucherCanvas());
+    });
+
+    closeVoucherBtn.addEventListener("click", () => {
+      voucherModal.style.display = "none";
+    });
+    voucherModal.addEventListener("click", (e) => {
+      if (e.target === voucherModal) voucherModal.style.display = "none";
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && voucherModal.style.display === "flex") {
+        voucherModal.style.display = "none";
+      }
+    });
+
+    function drawRoundedRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 4) {
+      const words = String(text || "").split(/\s+/);
+      let line = "";
+      const lines = [];
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          lines.push(line.trim());
+          line = words[n] + " ";
+          if (lines.length >= maxLines) break;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line.trim() && lines.length < maxLines) lines.push(line.trim());
+      lines.forEach((l, i) => {
+        ctx.fillText(l, x, y + i * lineHeight);
+      });
+      return lines.length;
+    }
+
+    function drawA4VoucherCanvas() {
+      const canvas = voucherPreviewCanvas;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;  // 1654 px (A4 breedte op 200 DPI)
+      const H = canvas.height; // 2339 px (A4 hoogte op 200 DPI)
+
+      const h = window.currentHeroData || { tens: 4, total: 11, osat: "100%", initials: "VR", branch: "Echt", monthLabel: formatMonthLabel(currentMonth) };
+      const heroName = winnerNameInput.value.trim() || h.name || "Customer Hero";
+      const heroBranchMeta = winnerBranchInput.value.trim() || `Vestiging ${h.branch} • ${h.monthLabel}`;
+      const personalNote = personalNoteInput.value.trim() || "Bedankt voor jouw geweldige inzet en klantgerichtheid!";
+      const giftTitle = selectedGiftType === "bol"
+        ? "Bol.com Cadeaukaart t.w.v. € 25,-"
+        : (customGiftInput.value.trim() || "Speciaal Customer Hero Cadeau");
+      const giftSub = selectedGiftType === "bol"
+        ? "Officiële waardebon voor de meeste 10'en van de maand"
+        : "Persoonlijke beloning namens het team van Volvo Rutten";
+
+      // 1. Achtergrond (Scandinavisch Parelwit met subtiel radiaal verloop)
+      const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+      bgGrad.addColorStop(0, "#fbfcfe");
+      bgGrad.addColorStop(0.5, "#f3f7fb");
+      bgGrad.addColorStop(1, "#eaf0f8");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Zachte gouden gloed rechtsboven & navy gloed linksonder
+      const glowGold = ctx.createRadialGradient(W * 0.85, H * 0.14, 20, W * 0.85, H * 0.14, 520);
+      glowGold.addColorStop(0, "rgba(245, 196, 0, 0.16)");
+      glowGold.addColorStop(1, "rgba(245, 196, 0, 0)");
+      ctx.fillStyle = glowGold;
+      ctx.fillRect(0, 0, W, H);
+
+      const glowNavy = ctx.createRadialGradient(W * 0.15, H * 0.85, 20, W * 0.15, H * 0.85, 580);
+      glowNavy.addColorStop(0, "rgba(0, 48, 87, 0.10)");
+      glowNavy.addColorStop(1, "rgba(0, 48, 87, 0)");
+      ctx.fillStyle = glowNavy;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Dubbel Certificaat Sierkader (Navy & Goud)
+      drawRoundedRect(ctx, 56, 56, W - 112, H - 112, 36);
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "#003057";
+      ctx.stroke();
+
+      drawRoundedRect(ctx, 76, 76, W - 152, H - 152, 26);
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = "#f5c400";
+      ctx.stroke();
+
+      // 3. Officieel VOLVO | Rutten Logo bovenaan
+      drawRoundedRect(ctx, W / 2 - 250, 128, 500, 108, 26);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0, 48, 87, 0.10)";
+      ctx.stroke();
+
+      if (cachedLogoImg.complete && cachedLogoImg.naturalWidth > 0) {
+        const logoW = 390;
+        const logoH = (cachedLogoImg.naturalHeight / cachedLogoImg.naturalWidth) * logoW;
+        ctx.drawImage(cachedLogoImg, (W - logoW) / 2, 128 + (108 - logoH) / 2, logoW, logoH);
+      }
+
+      // 4. Gouden Award Pill
+      drawRoundedRect(ctx, W / 2 - 290, 276, 580, 54, 27);
+      ctx.fillStyle = "rgba(245, 196, 0, 0.22)";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(245, 196, 0, 0.65)";
+      ctx.stroke();
+
+      ctx.fillStyle = "#713f12";
+      ctx.font = "800 23px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("★  CUSTOMER CHAMPION AWARD  ★", W / 2, 311);
+
+      // 5. Hoofdtitel: Gefeliciteerd! Jij bent de customer hero van de maand!
+      ctx.fillStyle = "#003057";
+      ctx.font = "800 76px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText("Gefeliciteerd!", W / 2, 430);
+
+      ctx.fillStyle = "#1c6bba";
+      ctx.font = "700 42px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText("Jij bent de Customer Hero van de maand!", W / 2, 496);
+
+      // 6. Hero Spotlight Card op de A4
+      const cardX = 140;
+      const cardY = 555;
+      const cardW = W - 280;
+      const cardH = 440;
+
+      const heroGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+      heroGrad.addColorStop(0, "#003057");
+      heroGrad.addColorStop(1, "#001b33");
+      drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 34);
+      ctx.fillStyle = heroGrad;
+      ctx.fill();
+
+      // Gouden rand om Hero Card
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(245, 196, 0, 0.7)";
+      ctx.stroke();
+
+      // Gouden Medaille / Avatar cirkel
+      const cx = W / 2;
+      const cy = cardY + 115;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 66, 0, Math.PI * 2);
+      ctx.fillStyle = "#f5c400";
+      ctx.fill();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+
+      const initials = heroName.split(" ").filter(Boolean).map(p => p[0]).slice(0, 2).join("").toUpperCase() || "CH";
+      ctx.fillStyle = "#003057";
+      ctx.font = "800 46px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(initials, cx, cy + 16);
+
+      // Naam van de Winnaar
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 66px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(heroName, W / 2, cardY + 265);
+
+      // Vestiging & Maand
+      ctx.fillStyle = "#f5c400";
+      ctx.font = "700 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(heroBranchMeta, W / 2, cardY + 322);
+
+      // Subtekst in Hero Card
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.font = "500 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText("Uitgeroepen tot nr. 1 PST'er met de meeste 10'en in de One Voice klanttevredenheid", W / 2, cardY + 385);
+
+      // 7. Drie Prestatie-kaarten naast elkaar
+      const statY = 1045;
+      const statGap = 32;
+      const statW = (cardW - statGap * 2) / 3;
+      const statH = 190;
+
+      const stats = [
+        { label: "AANTAL 10'EN DEZE MAAND", val: `${h.tens || 0}× een 10`, color: "#b45309", bg: "rgba(245, 196, 0, 0.14)" },
+        { label: "PERSOONLIJKE OSAT SCORE", val: `${h.osat || "100%"}`, color: "#15803d", bg: "rgba(22, 163, 74, 0.12)" },
+        { label: "KLANTBEOORDELINGEN", val: `${h.total || 0} reacties`, color: "#003057", bg: "rgba(0, 48, 87, 0.08)" }
+      ];
+
+      stats.forEach((st, idx) => {
+        const sx = cardX + idx * (statW + statGap);
+        drawRoundedRect(ctx, sx, statY, statW, statH, 24);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(0, 48, 87, 0.12)";
+        ctx.stroke();
+
+        // Top pill bar
+        drawRoundedRect(ctx, sx + 24, statY + 24, statW - 48, 38, 12);
+        ctx.fillStyle = st.bg;
+        ctx.fill();
+
+        ctx.fillStyle = st.color;
+        ctx.font = "800 19px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+        ctx.fillText(st.label, sx + statW / 2, statY + 50);
+
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "800 48px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+        ctx.fillText(st.val, sx + statW / 2, statY + 136);
+      });
+
+      // 8. Klantcompliment / Persoonlijke Boodschap Box
+      const quoteY = 1280;
+      const quoteH = 250;
+      drawRoundedRect(ctx, cardX, quoteY, cardW, quoteH, 26);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0, 48, 87, 0.12)";
+      ctx.stroke();
+
+      ctx.fillStyle = "#003057";
+      ctx.font = "800 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText("💬  WAARDERING & KLANTCOMPLIMENT", W / 2, quoteY + 50);
+
+      ctx.fillStyle = "#334155";
+      ctx.font = "italic 500 30px Georgia, 'Times New Roman', serif";
+      wrapCanvasText(ctx, personalNote, W / 2, quoteY + 108, cardW - 110, 44, 3);
+
+      // 9. LUXE CADEAUCHEQUE / WAARDEBON VOUCHER SECTIE
+      const vY = 1585;
+      const vH = 470;
+
+      // Gouden/Witte Voucher achtergrond
+      const vGrad = ctx.createLinearGradient(cardX, vY, cardX + cardW, vY + vH);
+      vGrad.addColorStop(0, "#fffdf5");
+      vGrad.addColorStop(0.5, "#ffffff");
+      vGrad.addColorStop(1, "#fef9e7");
+      drawRoundedRect(ctx, cardX, vY, cardW, vH, 32);
+      ctx.fillStyle = vGrad;
+      ctx.fill();
+
+      // Gestippelde uitknip-/voucherrand
+      ctx.save();
+      ctx.setLineDash([16, 12]);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#f5c400";
+      ctx.stroke();
+      ctx.restore();
+
+      // Binnenste Navy kader in de voucher
+      drawRoundedRect(ctx, cardX + 18, vY + 18, cardW - 36, vH - 36, 24);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0, 48, 87, 0.18)";
+      ctx.stroke();
+
+      // Cadeau badge bovenaan de voucher
+      drawRoundedRect(ctx, W / 2 - 220, vY + 46, 440, 52, 26);
+      ctx.fillStyle = selectedGiftType === "bol" ? "#0000a4" : "#003057";
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 23px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(selectedGiftType === "bol" ? "🎁  BOL.COM CADEAUKAART" : "🎁  PERSOONLIJKE CADEAUCHEQUE", W / 2, vY + 80);
+
+      // Het gekozen cadeau groot in beeld
+      ctx.fillStyle = "#003057";
+      ctx.font = "800 54px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      wrapCanvasText(ctx, giftTitle, W / 2, vY + 185, cardW - 120, 62, 2);
+
+      ctx.fillStyle = "#475569";
+      ctx.font = "600 27px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(giftSub, W / 2, vY + 290);
+
+      // Ruimte voor de fysieke kaart / code / handtekening onderin de voucher
+      drawRoundedRect(ctx, cardX + 90, vY + 332, cardW - 180, 92, 18);
+      ctx.fillStyle = "rgba(0, 48, 87, 0.04)";
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(0, 48, 87, 0.14)";
+      ctx.stroke();
+
+      ctx.fillStyle = "#003057";
+      ctx.font = "700 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText("Namens het hele team van Volvo Rutten — Bedankt voor jouw topservice!", W / 2, vY + 387);
+
+      // 10. Footer onderaan het A4-document
+      const todayStr = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(`Volvo Rutten • Echt • Venlo • Boxmeer  |  Customer Champion Programma  |  Uitgereikt op ${todayStr}`, W / 2, H - 115);
+    }
+
+    // Zelfstandige A4 PDF-generator (verpakt het hoge-resolutie A4 canvas in een geldig %PDF-1.4 bestand)
+    function canvasToA4PdfBlob(canvas) {
+      const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.95);
+      const base64 = jpegDataUrl.split(",")[1];
+      const binStr = atob(base64);
+      const imgBytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) {
+        imgBytes[i] = binStr.charCodeAt(i);
+      }
+
+      const wPx = canvas.width;
+      const hPx = canvas.height;
+      // Exacte A4 afmetingen in PDF points (72 dpi: 210mm x 297mm = 595.28 x 841.89 pt)
+      const pageW = 595.28;
+      const pageH = 841.89;
+
+      const encoder = new TextEncoder();
+      const chunks = [];
+      const offsets = [];
+      let byteOffset = 0;
+
+      function pushStr(str) {
+        const bytes = encoder.encode(str);
+        chunks.push(bytes);
+        byteOffset += bytes.length;
+      }
+
+      function pushBytes(bytes) {
+        chunks.push(bytes);
+        byteOffset += bytes.length;
+      }
+
+      function startObj(id) {
+        offsets[id] = byteOffset;
+        pushStr(`${id} 0 obj\n`);
+      }
+
+      pushStr("%PDF-1.4\n%\xFF\xFF\xFF\xFF\n");
+
+      // Object 1: Catalog
+      startObj(1);
+      pushStr("<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+
+      // Object 2: Pages
+      startObj(2);
+      pushStr("<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
+
+      // Object 3: Page (A4)
+      startObj(3);
+      pushStr(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`);
+
+      // Object 4: JPEG Image XObject
+      startObj(4);
+      pushStr(`<< /Type /XObject /Subtype /Image /Width ${wPx} /Height ${hPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgBytes.length} >>\nstream\n`);
+      pushBytes(imgBytes);
+      pushStr("\nendstream\nendobj\n");
+
+      // Object 5: Page Content Stream
+      const contentStream = `q\n${pageW} 0 0 ${pageH} 0 0 cm\n/Im0 Do\nQ\n`;
+      startObj(5);
+      pushStr(`<< /Length ${contentStream.length} >>\nstream\n${contentStream}endstream\nendobj\n`);
+
+      // XRef table
+      const xrefStart = byteOffset;
+      pushStr("xref\n0 6\n0000000000 65535 f \n");
+      for (let i = 1; i <= 5; i++) {
+        const padded = String(offsets[i]).padStart(10, "0");
+        pushStr(`${padded} 00000 n \n`);
+      }
+
+      pushStr(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`);
+
+      return new Blob(chunks, { type: "application/pdf" });
+    }
+
+    downloadVoucherPdfBtn.addEventListener("click", () => {
+      drawA4VoucherCanvas();
+      const pdfBlob = canvasToA4PdfBlob(voucherPreviewCanvas);
+      const safeName = (winnerNameInput.value.trim() || "Customer_Hero").replace(/[^a-zA-Z0-9_-]+/g, "_");
+      const safeMonth = formatMonthLabel(currentMonth).replace(/\s+/g, "_");
+      const fileName = `Customer_Hero_Cadeaubon_${safeName}_${safeMonth}.pdf`;
+
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      voucherDownloadStatus.textContent = `✅ ${fileName} is gedownload!`;
+    });
+
+    // ==================== INITIALISATIE ====================
+    function initDashboard() {
+      populateMonthSelectors();
+      renderDashboard();
+      updateNotifUI();
+      checkForRemoteDataUpdate();
+      setInterval(checkForRemoteDataUpdate, 60000);
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
