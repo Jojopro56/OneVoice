@@ -1550,6 +1550,38 @@
       font-weight: 700;
     }
 
+    .email-studio-box {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(0, 48, 87, 0.05));
+      border: 1px solid rgba(0, 48, 87, 0.16);
+      box-shadow: 0 8px 24px rgba(0, 32, 64, 0.05), inset 0 1px 0 #ffffff;
+    }
+
+    .email-subject-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(0, 48, 87, 0.045);
+      border: 1px solid rgba(0, 48, 87, 0.12);
+      font-size: 0.82rem;
+    }
+
+    .email-preview-frame {
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #eaeff5;
+      border: 1px solid rgba(0, 48, 87, 0.14);
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
     /* Mobiele vestigingskaarten (standaard verborgen op breedbeeld/desktop) */
     .mobile-branch-cards {
       display: none;
@@ -2289,6 +2321,49 @@
             👁️ Direct bekijken in dashboard
           </button>
         </div>
+      </div>
+
+      <!-- Stap 5: Directie E-mail Generator (in dezelfde stijl als het dashboard) -->
+      <div class="email-studio-box">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <strong style="font-size: 0.92rem; color: var(--volvo-navy);">Stap 5: E-mail voor Directie &amp; Management kopiëren (Dashboard-stijl)</strong>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">
+              Klaar voor verzending na het invullen van Stap 1 t/m 4: kopieert de opgemaakte e-mail (inclusief tabellen, KPI-kleuren, Customer Hero en jouw Focuspunten uit Stap 3) voor direct plakken in Outlook of Gmail.
+            </div>
+          </div>
+          <span class="tens-pill" style="background: rgba(22, 163, 74, 0.14); border-color: rgba(22, 163, 74, 0.3); color: var(--green);">Klaar om te plakken</span>
+        </div>
+
+        <!-- Onderwerpregel met 1-klik kopieerknop -->
+        <div class="email-subject-bar">
+          <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <span style="color: var(--text-muted); font-weight: 600;">Onderwerp:</span>
+            <strong id="dir-email-subject" style="color: var(--volvo-navy); margin-left: 4px;">📊 Nieuw Maandoverzicht One Voice Klanttevredenheid — Volvo Rutten</strong>
+          </div>
+          <button type="button" id="copy-email-subject-btn" class="icon-pill-btn" style="padding: 5px 11px; font-size: 0.75rem; flex-shrink: 0;">
+            📋 Kopieer onderwerp
+          </button>
+        </div>
+
+        <!-- Knoppen: Kopieer Opgemaakte E-mail (HTML + Tekst) -->
+        <div class="ai-actions-grid" style="margin-top: 12px;">
+          <button type="button" id="copy-dir-email-btn" class="btn-primary">
+            ✉️ Kopieer opgemaakte Directie E-mail (voor Outlook / Mail)
+          </button>
+          <button type="button" id="copy-dir-email-text-btn" class="btn-secondary">
+            📄 Kopieer als platte tekst
+          </button>
+        </div>
+        <div id="copy-dir-email-status" style="margin-top: 6px; font-size: 0.8rem; font-weight: 600; color: var(--green);"></div>
+
+        <!-- Live voorbeeld van de opgemaakte e-mail -->
+        <details style="margin-top: 10px;" open>
+          <summary style="cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--volvo-blue);">
+            👁️ Live voorbeeld van de Directie E-mail (wordt exact in deze opmaak gekopieerd)
+          </summary>
+          <div class="email-preview-frame" id="dir-email-preview-container"></div>
+        </details>
       </div>
 
       <!-- Extra: 1-klik Direct naar GitHub pushen -->
@@ -3283,9 +3358,501 @@ ${reviewLines || "(Nog geen slechte reviews geladen voor deze maand)"}`;
       document.getElementById("gh-token").value = localStorage.getItem("vr_gh_token") || "";
 
       updateBadReviewsWorkflowUI();
+      updateDirectorEmailPreview();
     }
 
     document.getElementById("admin-target-month").addEventListener("change", syncAdminModalFields);
+
+    // ==================== STAP 5: DIRECTIE E-MAIL GENERATOR (IN DASHBOARD STIJL) ====================
+    const DASHBOARD_LIVE_URL = "https://jojopro56.github.io/OneVoice/";
+
+    function getEmailChipColors(val, target) {
+      if (val === null || val === undefined || isNaN(val)) {
+        return { bg: "#f1f5f9", fg: "#64748b", border: "#cbd5e1" };
+      }
+      if (val >= target) {
+        return { bg: "#dcfce7", fg: "#15803d", border: "#bbf7d0" };
+      }
+      if (val >= target - 5) {
+        return { bg: "#fef3c7", fg: "#b45309", border: "#fde68a" };
+      }
+      return { bg: "#fee2e2", fg: "#b91c1c", border: "#fecaca" };
+    }
+
+    function escapeEmailHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function formatEmailFocusBullet(line) {
+      const cleaned = String(line || "").replace(/^\s*(?:[•\-*]|\d+[.)])\s*/, "").trim();
+      let safe = escapeEmailHtml(cleaned);
+      if (safe.includes("**")) {
+        safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong style=\"color:#003057;font-weight:700;\"><font color=\"#003057\">$1</font></strong>");
+      } else {
+        safe = safe.replace(/^([^.!?:]{4,68}[.:])(\s+.*)$/, "<strong style=\"color:#003057;font-weight:700;\"><font color=\"#003057\">$1</font></strong>$2");
+      }
+      return safe;
+    }
+
+    function buildDirectorEmailData() {
+      const targetM = document.getElementById("admin-target-month").value || currentMonth;
+      const mLabel = formatMonthLabel(targetM);
+      const months = getAvailableMonths();
+      const idx = months.indexOf(targetM);
+      const prevMonth = idx >= 0 && idx + 1 < months.length ? months[idx + 1] : null;
+      const currentYear = (targetM || "2026").split("-")[0];
+
+      const allResponses = appData.responses || [];
+      const monthRows = allResponses.filter(r => r.month === targetM);
+      const prevRows = prevMonth ? allResponses.filter(r => r.month === prevMonth) : [];
+      const ytdRows = allResponses.filter(r => r.year === currentYear && r.month <= targetM);
+
+      const mStats = calcMetrics(monthRows);
+      const pStats = calcMetrics(prevRows);
+      const yStats = calcMetrics(ytdRows);
+
+      let deltaStr = "n.v.t.";
+      let deltaBg = "#1e3a5f";
+      let deltaColor = "#e2e8f0";
+      let deltaBorder = "#33537a";
+      if (mStats.osat !== null && pStats.osat !== null) {
+        const diff = mStats.osat - pStats.osat;
+        const sign = diff > 0 ? "+" : "";
+        deltaStr = `${sign}${diff.toFixed(1).replace(".", ",")}% t.o.v. ${formatMonthLabel(prevMonth)}`;
+        if (diff > 0.05) { deltaBg = "#dcfce7"; deltaColor = "#15803d"; deltaBorder = "#86efac"; }
+        else if (diff < -0.05) { deltaBg = "#fee2e2"; deltaColor = "#b91c1c"; deltaBorder = "#fca5a5"; }
+      }
+
+      // Lees de actuele Maand- en Cumulatieve posities direct uit de Stap 2 invoervelden
+      const mRanks = [];
+      const cRanks = [];
+      const branchRankMap = {};
+      ["Echt", "Venlo", "Boxmeer"].forEach(b => {
+        const mEl = document.getElementById(`rank-${b}-month`);
+        const cEl = document.getElementById(`rank-${b}-cum`);
+        const mVal = mEl ? parseInt(mEl.value, 10) : NaN;
+        const cVal = cEl ? parseInt(cEl.value, 10) : NaN;
+        branchRankMap[b] = {
+          monthRank: isNaN(mVal) ? null : mVal,
+          cumRank: isNaN(cVal) ? null : cVal
+        };
+        if (!isNaN(mVal)) mRanks.push(mVal);
+        if (!isNaN(cVal)) cRanks.push(cVal);
+      });
+      const avgMonthRank = mRanks.length ? Math.round(mRanks.reduce((a, b) => a + b, 0) / mRanks.length) : null;
+      const avgCumRank = cRanks.length ? Math.round(cRanks.reduce((a, b) => a + b, 0) / cRanks.length) : null;
+
+      // Customer Hero van de maand berekenen
+      const pstMap = {};
+      monthRows.forEach(r => {
+        if (!r.pst || typeof r.osat !== "number") return;
+        if (!pstMap[r.pst]) pstMap[r.pst] = { name: r.pst, branch: r.branch, tens: 0, total: 0, top2: 0 };
+        pstMap[r.pst].total++;
+        if (r.osat === 10) pstMap[r.pst].tens++;
+        if (r.osat >= 9) pstMap[r.pst].top2++;
+      });
+      const pstRanking = Object.values(pstMap).sort((a, b) => (b.tens - a.tens) || ((b.top2 / b.total) - (a.top2 / a.total)) || (b.total - a.total));
+      const hero = pstRanking.length > 0 ? pstRanking[0] : null;
+      const heroOsat = hero ? ((hero.top2 / hero.total) * 100).toFixed(0) + "%" : "--%";
+
+      // Vestigingen overzicht
+      const branchSummary = ["Totaal", "Echt", "Venlo", "Boxmeer"].map(bName => {
+        const rows = allResponses.filter(r => r.month === targetM && (bName === "Totaal" || r.branch === bName));
+        const st = calcMetrics(rows);
+        const rnk = bName === "Totaal"
+          ? { monthRank: avgMonthRank, cumRank: avgCumRank }
+          : (branchRankMap[bName] || { monthRank: null, cumRank: null });
+        return {
+          label: bName === "Totaal" ? "Rutten Totaal" : bName,
+          isTotal: bName === "Totaal",
+          ...st,
+          monthRank: rnk.monthRank,
+          cumRank: rnk.cumRank
+        };
+      });
+
+      // Focuspunten uit Stap 3
+      const tipQuote = (document.getElementById("admin-tip-quote")?.value || "").trim() || "Doe alsof het je eigen auto is";
+      const tipAuthor = (document.getElementById("admin-tip-author")?.value || "").trim() || "Customer Champion";
+      const tipBodyRaw = (document.getElementById("admin-tip-body")?.value || "").trim();
+      const focusLines = tipBodyRaw
+        ? tipBodyRaw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+        : [
+            "**Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie volledig in de werkorder.",
+            "**Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af met de klant.",
+            "**Houd de klant op de hoogte** van de voortgang. Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten."
+          ];
+
+      const subject = `📊 Nieuw Maandoverzicht One Voice Klanttevredenheid — ${mLabel} (Volvo Rutten)`;
+
+      // Helper voor een Outlook-proof gekleurde KPI-chip (gebruikt een geneste <td> met bgcolor zodat Outlook nooit de achtergrondkleur stript)
+      const renderEmailChip = (val, target) => {
+        const c = getEmailChipColors(val, target);
+        return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;border-collapse:separate;">
+          <tr>
+            <td bgcolor="${c.bg}" align="center" style="background-color:${c.bg};color:${c.fg};border:1px solid ${c.border};border-radius:8px;padding:4px 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;white-space:nowrap;">
+              <font color="${c.fg}"><strong>${formatPct(val)}</strong></font>
+            </td>
+          </tr>
+        </table>`;
+      };
+
+      const branchRowsHtml = branchSummary.map(b => {
+        const rowBg = b.isTotal ? "#f0f5fa" : "#ffffff";
+        return `
+        <tr bgcolor="${rowBg}" style="background-color:${rowBg};">
+          <td bgcolor="${rowBg}" style="background-color:${rowBg};padding:10px 12px;border-bottom:1px solid #e2e8f0;font-family:'Segoe UI',Arial,sans-serif;font-weight:${b.isTotal ? "800" : "600"};color:#003057;font-size:13px;">
+            <font color="#003057">${ b.isTotal ? `<strong>${escapeEmailHtml(b.label)}</strong>` : escapeEmailHtml(b.label) }</font>
+          </td>
+          <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:8px 6px;border-bottom:1px solid #e2e8f0;">
+            ${renderEmailChip(b.osat, 67)}
+          </td>
+          <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:8px 6px;border-bottom:1px solid #e2e8f0;">
+            ${renderEmailChip(b.begrip, 69)}
+          </td>
+          <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:8px 6px;border-bottom:1px solid #e2e8f0;">
+            ${renderEmailChip(b.toelichting, 66)}
+          </td>
+          <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:8px 6px;border-bottom:1px solid #e2e8f0;">
+            ${renderEmailChip(b.rftit, 93)}
+          </td>
+          <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:10px 8px;border-bottom:1px solid #e2e8f0;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;font-weight:700;color:#003057;">
+            <font color="#003057">${b.monthRank ? `#${b.monthRank}` : "—"}</font>
+          </td>
+          <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:10px 8px;border-bottom:1px solid #e2e8f0;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#334155;white-space:nowrap;">
+            <font color="#334155"><strong>${b.count}</strong></font> <font color="#64748b" style="font-size:11px;">(${b.tens}× 10)</font>
+          </td>
+        </tr>`;
+      }).join("");
+
+      const focusListHtml = focusLines.map(line => `
+        <tr>
+          <td valign="top" width="18" style="padding:5px 6px 5px 0;font-family:'Segoe UI',Arial,sans-serif;color:#003057;font-weight:900;font-size:15px;line-height:20px;">
+            <font color="#003057">•</font>
+          </td>
+          <td valign="top" style="padding:5px 0;font-family:'Segoe UI',Arial,sans-serif;font-size:13.5px;line-height:20px;color:#334155;">
+            <font color="#334155">${formatEmailFocusBullet(line)}</font>
+          </td>
+        </tr>
+      `).join("");
+
+      // 100% Outlook-proof HTML (elke kaart en badge is een eigen <table> met bgcolor + <font color="..."> + white-space:nowrap)
+      const html = `
+<div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;background-color:#eaeff5;padding:20px 14px;color:#0f172a;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="660" align="center" style="width:100%;max-width:660px;margin:0 auto;background-color:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #d0dceb;border-collapse:separate;">
+    <!-- Top Header Banner in Volvo Rutten stijl -->
+    <tr>
+      <td bgcolor="#003057" style="background-color:#003057;background-image:linear-gradient(135deg,#003057 0%,#001b33 100%);padding:24px 26px;color:#ffffff;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td valign="middle" style="padding-right:12px;">
+              <!-- Gouden Badge als aparte table zodat Outlook de kleuren & rand 100% behoudt -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">
+                <tr>
+                  <td bgcolor="#163b5c" style="background-color:#163b5c;border:1px solid #f5c400;border-radius:999px;padding:4px 12px;font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.5px;color:#f5c400;">
+                    <font color="#f5c400">★ NIEUW MAANDOVERZICHT BESCHIKBAAR</font>
+                  </td>
+                </tr>
+              </table>
+              <div style="margin:10px 0 4px 0;font-family:'Segoe UI',Arial,sans-serif;font-size:22px;line-height:28px;font-weight:800;color:#ffffff;">
+                <font color="#ffffff"><strong>VOLVO | Rutten — ${escapeEmailHtml(mLabel)}</strong></font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:12.5px;line-height:18px;color:#cbd5e1;">
+                <font color="#cbd5e1">Aftersales &amp; Service Klanttevredenheid (One Voice) • Echt • Venlo • Boxmeer</font>
+              </div>
+            </td>
+            <td align="right" valign="top" width="175" style="width:175px;">
+              <!-- Steekproef Box met nowrap zodat "23x een 10" nooit lelijk afbreekt -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" style="border-collapse:separate;">
+                <tr>
+                  <td bgcolor="#133f66" align="right" style="background-color:#133f66;border:1px solid #386186;padding:9px 14px;border-radius:12px;text-align:right;white-space:nowrap;">
+                    <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;line-height:14px;color:#cbd5e1;font-weight:700;letter-spacing:0.5px;">
+                      <font color="#cbd5e1">STEEKPROEF</font>
+                    </div>
+                    <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13.5px;line-height:19px;font-weight:800;color:#ffffff;margin-top:2px;white-space:nowrap;">
+                      <font color="#ffffff"><strong>${mStats.count} resp.</strong></font> <font color="#cbd5e1">•</font> <font color="#f5c400"><strong>${mStats.tens}× een 10</strong></font>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Introductietekst -->
+    <tr>
+      <td bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 26px 8px 26px;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;line-height:22px;color:#334155;">
+        <font color="#334155">
+          Beste directie,<br><br>
+          Het nieuwe maandoverzicht van de <strong style="color:#003057;"><font color="#003057">One Voice klanttevredenheid voor ${escapeEmailHtml(mLabel)}</font></strong> staat live op het Customer Champion Dashboard. Hieronder vinden jullie de belangrijkste inzichten, de vestigingsscores en onze focuspunten voor deze maand.
+        </font>
+      </td>
+    </tr>
+
+    <!-- 1. BELANGRIJKSTE INZICHTEN (3 KPI Kaarten naast elkaar met gelijke hoogte) -->
+    <tr>
+      <td bgcolor="#ffffff" style="background-color:#ffffff;padding:12px 26px;">
+        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.6px;color:#64748b;margin-bottom:10px;">
+          <font color="#64748b"><strong>1. BELANGRIJKSTE INZICHTEN — ${escapeEmailHtml(mLabel.toUpperCase())}</strong></font>
+        </div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;width:100%;">
+          <tr>
+            <!-- Kaart 1: OSAT -->
+            <td width="32%" valign="top" bgcolor="#003057" style="width:32%;background-color:#003057;border:1px solid #003057;border-radius:14px;padding:14px 14px;">
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;line-height:14px;font-weight:700;letter-spacing:0.5px;color:#cbd5e1;">
+                <font color="#cbd5e1">OSAT SCORE (MAAND)</font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:26px;line-height:32px;font-weight:800;color:#ffffff;margin:6px 0;">
+                <font color="#ffffff"><strong>${formatPct(mStats.osat)}</strong></font>
+              </div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;margin-bottom:8px;">
+                <tr>
+                  <td bgcolor="${deltaBg}" style="background-color:${deltaBg};border:1px solid ${deltaBorder};border-radius:999px;padding:2px 8px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;line-height:15px;font-weight:700;color:${deltaColor};">
+                    <font color="${deltaColor}"><strong>${escapeEmailHtml(deltaStr)}</strong></font>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:16px;color:#cbd5e1;padding-top:7px;border-top:1px solid #244b6e;">
+                <font color="#cbd5e1">Cumulatief ${currentYear}:</font> <font color="#ffffff"><strong>${formatPct(yStats.osat)}</strong></font>
+              </div>
+            </td>
+
+            <td width="2%" style="width:2%;font-size:1px;line-height:1px;">&nbsp;</td>
+
+            <!-- Kaart 2: Landelijke Positie -->
+            <td width="32%" valign="top" bgcolor="#f8fafc" style="width:32%;background-color:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;padding:14px 14px;">
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;line-height:14px;font-weight:700;letter-spacing:0.5px;color:#64748b;">
+                <font color="#64748b">POSITIE IN HET LAND</font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:26px;line-height:32px;font-weight:800;color:#003057;margin:6px 0;">
+                <font color="#003057"><strong>${avgMonthRank ? `#${avgMonthRank}` : "#--"}</strong></font> <font color="#64748b" style="font-size:13px;font-weight:600;">/ 82</font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:17px;color:#475569;margin-bottom:8px;">
+                <font color="#475569">Cumulatief:</font> <font color="#003057"><strong>${avgCumRank ? `#${avgCumRank} / 82` : "n.v.t."}</strong></font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:16px;color:#64748b;padding-top:7px;border-top:1px solid #e2e8f0;">
+                <font color="#64748b">Doelstelling:</font> <font color="#003057"><strong>Top 20 NL</strong></font>
+              </div>
+            </td>
+
+            <td width="2%" style="width:2%;font-size:1px;line-height:1px;">&nbsp;</td>
+
+            <!-- Kaart 3: Customer Hero -->
+            <td width="32%" valign="top" bgcolor="#fffdf5" style="width:32%;background-color:#fffdf5;border:1.5px solid #f5c400;border-radius:14px;padding:14px 14px;">
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;line-height:14px;font-weight:800;letter-spacing:0.5px;color:#b45309;">
+                <font color="#b45309">🏆 CUSTOMER HERO</font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:16px;line-height:22px;font-weight:800;color:#003057;margin:6px 0 3px 0;">
+                <font color="#003057"><strong>${escapeEmailHtml(hero ? hero.name : "Nog niet bekend")}</strong></font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11.5px;line-height:17px;color:#475569;font-weight:600;margin-bottom:8px;">
+                <font color="#475569">${hero ? `Vestiging ${escapeEmailHtml(hero.branch)} • <strong style="color:#003057;"><font color="#003057">${hero.tens}× een 10</font></strong>` : "—"}</font>
+              </div>
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:16px;color:#15803d;font-weight:700;padding-top:7px;border-top:1px solid #fde68a;">
+                <font color="#15803d"><strong>${hero ? `${heroOsat} OSAT (${hero.total} reacties)` : "Winnaar maandbon"}</strong></font>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- 2. OVERZICHT PER VESTIGING -->
+    <tr>
+      <td bgcolor="#ffffff" style="background-color:#ffffff;padding:14px 26px;">
+        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.6px;color:#64748b;margin-bottom:8px;">
+          <font color="#64748b"><strong>2. RESULTATEN PER VESTIGING (GROEN = OP DOEL)</strong></font>
+        </div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;border-collapse:collapse;">
+          <thead>
+            <tr bgcolor="#f1f5f9" style="background-color:#f1f5f9;">
+              <th align="left" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 12px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">VESTIGING</font></th>
+              <th align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 6px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">OSAT</font></th>
+              <th align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 6px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">BEGRIP (69)</font></th>
+              <th align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 6px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">TOEL. (66)</font></th>
+              <th align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 6px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">RFTIT (93)</font></th>
+              <th align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 6px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">LAND (#/82)</font></th>
+              <th align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;padding:9px 8px;font-family:'Segoe UI',Arial,sans-serif;font-size:10.5px;color:#475569;border-bottom:1px solid #cbd5e1;"><font color="#475569">RESP.</font></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${branchRowsHtml}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+
+    <!-- 3. FOCUSPUNTEN VAN DEZE MAAND (Ingesteld in Stap 3) -->
+    <tr>
+      <td bgcolor="#ffffff" style="background-color:#ffffff;padding:14px 26px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:#f4f8fc;border:1.5px solid #cbd5e1;border-radius:14px;border-collapse:separate;">
+          <tr>
+            <td bgcolor="#f4f8fc" style="background-color:#f4f8fc;border-radius:14px;padding:16px 18px;">
+              <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.6px;color:#003057;margin-bottom:8px;">
+                <font color="#003057"><strong>🎯 3. FOCUSPUNTEN &amp; TIP VAN DE MAAND (${escapeEmailHtml(tipAuthor.toUpperCase())})</strong></font>
+              </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-bottom:10px;border-collapse:separate;">
+                <tr>
+                  <td bgcolor="#ffffff" style="background-color:#ffffff;border:1px solid #cbd5e1;border-radius:10px;padding:10px 14px;font-family:'Segoe UI',Arial,sans-serif;font-weight:800;font-size:14px;color:#003057;">
+                    <font color="#003057"><strong>“${escapeEmailHtml(tipQuote)}”</strong></font>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                ${focusListHtml}
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- 4. DIRECTE KNOP NAAR HET LIVE DASHBOARD -->
+    <tr>
+      <td bgcolor="#ffffff" align="center" style="background-color:#ffffff;padding:16px 26px 24px 26px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;border-collapse:separate;">
+          <tr>
+            <td align="center" bgcolor="#003057" style="background-color:#003057;border:1px solid #003057;border-radius:12px;padding:12px 26px;">
+              <a href="${DASHBOARD_LIVE_URL}" target="_blank" style="font-family:'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:800;color:#ffffff;text-decoration:none;display:inline-block;">
+                <font color="#ffffff"><strong>🚀 Open het Live Customer Champion Dashboard →</strong></font>
+              </a>
+            </td>
+          </tr>
+        </table>
+        <div style="margin-top:8px;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#64748b;">
+          <font color="#64748b">Directe link:</font> <a href="${DASHBOARD_LIVE_URL}" style="color:#1c6bba;font-weight:600;text-decoration:underline;"><font color="#1c6bba">${DASHBOARD_LIVE_URL}</font></a>
+        </div>
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td bgcolor="#f8fafc" align="center" style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:13px 26px;font-family:'Segoe UI',Arial,sans-serif;font-size:11.5px;color:#64748b;text-align:center;">
+        <font color="#003057"><strong>VOLVO | Rutten</strong></font> <font color="#64748b">• Customer Champion Dashboard • Echt • Venlo • Boxmeer</font>
+      </td>
+    </tr>
+  </table>
+</div>`.trim();
+
+      // Platte tekst fallback
+      const plainBranchLines = branchSummary.map(b =>
+        `- ${b.label}: OSAT ${formatPct(b.osat)} | Begrip ${formatPct(b.begrip)} | Toelichting ${formatPct(b.toelichting)} | RFTIT ${formatPct(b.rftit)} | Positie NL: ${b.monthRank ? "#" + b.monthRank : "n.v.t."} (${b.count} resp., ${b.tens}x een 10)`
+      ).join("\n");
+
+      const plainFocusLines = focusLines.map(l => `• ${l.replace(/\*\*/g, "")}`).join("\n");
+
+      const plainText = `Onderwerp: ${subject}
+
+Beste directie,
+
+Het nieuwe maandoverzicht van de One Voice klanttevredenheid voor ${mLabel} staat live op het Customer Champion Dashboard!
+
+1. BELANGRIJKSTE INZICHTEN (${mLabel.toUpperCase()})
+• Algemene tevredenheid (OSAT): ${formatPct(mStats.osat)} (${deltaStr}) — Cumulatief ${currentYear}: ${formatPct(yStats.osat)}
+• Positie in het land (van 82): Maand ${avgMonthRank ? "#" + avgMonthRank : "n.v.t."} | Cumulatief ${avgCumRank ? "#" + avgCumRank : "n.v.t."}
+• CSA KPI's (Totaal Rutten): Begrip klantbehoefte ${formatPct(mStats.begrip)} (doel 69%) | Ontvangen toelichting ${formatPct(mStats.toelichting)} (doel 66%) | Right First Time ${formatPct(mStats.rftit)} (doel 93%)
+• Customer Hero van de Maand: ${hero ? `${hero.name} (Vestiging ${hero.branch}) met ${hero.tens}x een 10 (${heroOsat} OSAT uit ${hero.total} reacties)` : "Nog niet bekend"}
+
+2. RESULTATEN PER VESTIGING
+${plainBranchLines}
+
+3. FOCUSPUNTEN DEZE MAAND (“${tipQuote}”)
+${plainFocusLines}
+
+4. BEKIJK HET VOLLEDIGE DASHBOARD
+👉 ${DASHBOARD_LIVE_URL}
+
+Met vriendelijke groet,
+Customer Champion • Volvo Rutten`;
+
+      return { subject, html, plainText };
+    }
+
+    function updateDirectorEmailPreview() {
+      const subjEl = document.getElementById("dir-email-subject");
+      const previewContainer = document.getElementById("dir-email-preview-container");
+      if (!subjEl || !previewContainer) return;
+      const { subject, html } = buildDirectorEmailData();
+      subjEl.textContent = subject;
+      previewContainer.innerHTML = html;
+    }
+
+    // Live bijwerken van de e-mail preview zodra je in Stap 2 of Stap 3 iets typt
+    [
+      "rank-Echt-month", "rank-Echt-cum",
+      "rank-Venlo-month", "rank-Venlo-cum",
+      "rank-Boxmeer-month", "rank-Boxmeer-cum",
+      "admin-tip-quote", "admin-tip-author", "admin-tip-body"
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", updateDirectorEmailPreview);
+    });
+
+    // Kopieer onderwerp
+    document.getElementById("copy-email-subject-btn").addEventListener("click", async () => {
+      const { subject } = buildDirectorEmailData();
+      const btn = document.getElementById("copy-email-subject-btn");
+      try {
+        await navigator.clipboard.writeText(subject);
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✅ Gekopieerd!";
+        setTimeout(() => { btn.innerHTML = orig; }, 2200);
+      } catch (_) {}
+    });
+
+    // Kopieer opgemaakte HTML e-mail (zodat plakken in Outlook / Gmail / Apple Mail de volledige dashboard-stijl behoudt)
+    document.getElementById("copy-dir-email-btn").addEventListener("click", async () => {
+      const { html, plainText } = buildDirectorEmailData();
+      const statusEl = document.getElementById("copy-dir-email-status");
+      const btn = document.getElementById("copy-dir-email-btn");
+
+      try {
+        if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+          const item = new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([plainText], { type: "text/plain" })
+          });
+          await navigator.clipboard.write([item]);
+        } else {
+          // Fallback via tijdelijke selectie van de preview-container
+          const previewEl = document.getElementById("dir-email-preview-container");
+          const range = document.createRange();
+          range.selectNodeContents(previewEl);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          document.execCommand("copy");
+          sel.removeAllRanges();
+        }
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✅ Opgemaakte e-mail gekopieerd!";
+        statusEl.textContent = "✅ De e-mail (inclusief dashboard-opmaak, kleuren, focuspunten en link) staat op je klembord. Druk op Ctrl+V in je mailprogramma!";
+        setTimeout(() => { btn.innerHTML = orig; }, 2800);
+      } catch (err) {
+        await navigator.clipboard.writeText(plainText);
+        statusEl.textContent = "✅ Gekopieerd naar klembord!";
+      }
+    });
+
+    // Kopieer als platte tekst
+    document.getElementById("copy-dir-email-text-btn").addEventListener("click", async () => {
+      const { plainText } = buildDirectorEmailData();
+      const statusEl = document.getElementById("copy-dir-email-status");
+      const btn = document.getElementById("copy-dir-email-text-btn");
+      try {
+        await navigator.clipboard.writeText(plainText);
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✅ Platte tekst gekopieerd!";
+        statusEl.textContent = "✅ Platte tekstversie van de directie-mail is gekopieerd naar je klembord.";
+        setTimeout(() => { btn.innerHTML = orig; }, 2600);
+      } catch (_) {}
+    });
 
     // Download-knop voor ANONIEME slechte reviews + klaargezette AI-prompt in 1 tekstbestand
     document.getElementById("download-bad-reviews-btn").addEventListener("click", () => {
