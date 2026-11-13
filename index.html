@@ -1476,6 +1476,80 @@
       transform: translateY(-1px);
     }
 
+    .btn-primary:disabled,
+    .btn-secondary:disabled,
+    .btn-disabled-locked {
+      background: #e2e8f0 !important;
+      color: #94a3b8 !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: none !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      opacity: 0.78;
+    }
+
+    .ai-workflow-box {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(0, 48, 87, 0.045), rgba(245, 196, 0, 0.08));
+      border: 1px solid rgba(0, 48, 87, 0.14);
+      box-shadow: inset 0 1px 0 #ffffff;
+    }
+
+    .ai-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .ai-prompt-preview {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(0, 48, 87, 0.14);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      line-height: 1.48;
+      color: var(--text-primary);
+      max-height: 185px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .tip-month-points {
+      list-style: none;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      padding: 0;
+    }
+
+    .tip-month-points li {
+      position: relative;
+      padding-left: 16px;
+      font-size: 0.83rem;
+      line-height: 1.46;
+      color: var(--text-secondary);
+    }
+
+    .tip-month-points li::before {
+      content: "•";
+      position: absolute;
+      left: 2px;
+      top: 0;
+      font-weight: 900;
+      color: var(--volvo-navy);
+    }
+
+    .tip-month-points li strong {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
     /* Mobiele vestigingskaarten (standaard verborgen op breedbeeld/desktop) */
     .mobile-branch-cards {
       display: none;
@@ -1752,6 +1826,7 @@
       .focus-columns { grid-template-columns: 1fr; gap: 12px; }
       .rank-inputs-grid { grid-template-columns: 1fr; }
       .action-buttons-row { grid-template-columns: 1fr; }
+      .ai-actions-grid { grid-template-columns: 1fr; }
       .month-history-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
       /* Bottom-sheet modal on mobile + 16px inputs to prevent iOS zoom */
       .modal-backdrop {
@@ -2054,9 +2129,9 @@
 
       <article class="glass-card review-card animate-in" style="--delay: 560ms; background: linear-gradient(145deg, rgba(255,255,255,0.84), rgba(0,48,87,0.06));">
         <div>
-          <div class="card-kicker" style="color: var(--volvo-navy);">🎯 Tip van de Maand</div>
+          <div class="card-kicker" style="color: var(--volvo-navy);">🎯 Tip van de Maand (Focuspunten)</div>
           <div class="quote-box" style="font-style: normal; font-weight: 700; color: var(--volvo-navy);" id="tip-month-quote">“Doe alsof het je eigen auto is”</div>
-          <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5;" id="tip-month-body"></p>
+          <div id="tip-month-body"></div>
         </div>
         <div class="review-nav" style="margin-top: 12px;">
           <strong id="tip-month-author" style="color: var(--volvo-navy);">—</strong>
@@ -2147,33 +2222,73 @@
         </div>
       </div>
 
-      <!-- Stap 2b: Optionele Tip van de Maand aanpassen -->
-      <details style="margin-top: 16px;">
-        <summary style="cursor: pointer; font-size: 0.88rem; font-weight: 700; color: var(--volvo-navy);">Optioneel: Tip van de Maand tekst aanpassen</summary>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+      <!-- Stap 3: AI Focuspunten & Tip van de Maand Generator (op basis van ANONIEME leermoment-reviews) -->
+      <div class="ai-workflow-box">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
           <div>
-            <label style="font-size: 0.78rem; color: var(--text-secondary);">Quote</label>
-            <input class="glass-input" type="text" id="admin-tip-quote" />
+            <strong style="font-size: 0.92rem; color: var(--volvo-navy);">Stap 3: Genereer ‘Tip van de Maand’ &amp; Focuspunten met AI (100% Anoniem)</strong>
+            <div id="bad-reviews-status" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">
+              Upload eerst het Excel-bestand in Stap 1 (of selecteer een maand met verbeterpunten) om de anonieme leermomenten te kunnen downloaden.
+            </div>
           </div>
-          <div>
-            <label style="font-size: 0.78rem; color: var(--text-secondary);">Naam / Auteur</label>
-            <input class="glass-input" type="text" id="admin-tip-author" />
-          </div>
+          <span id="bad-reviews-count-pill" class="tens-pill" style="background: rgba(0, 48, 87, 0.08); border-color: rgba(0, 48, 87, 0.18); color: var(--volvo-navy);">0 leermomenten</span>
         </div>
-        <div style="margin-top: 8px;">
-          <label style="font-size: 0.78rem; color: var(--text-secondary);">Toelichting</label>
-          <textarea class="glass-textarea" rows="2" id="admin-tip-body"></textarea>
-        </div>
-      </details>
 
-      <!-- Stap 3: 1 bestand genereren voor GitHub map 'maandoverzichten' -->
-      <div class="action-buttons-row">
-        <button id="download-datajs-btn" class="btn-primary">
-          ⬇️ Download <code>data.js</code> (voor map <code>maandoverzichten/</code>)
-        </button>
-        <button id="apply-preview-btn" class="btn-secondary">
-          👁️ Direct bekijken in dashboard
-        </button>
+        <!-- Knoppen naast elkaar: 1. Download slechte reviews deze maand (grijs totdat data er is) + 2. Kopieer AI Prompt -->
+        <div class="ai-actions-grid">
+          <button type="button" id="download-bad-reviews-btn" class="btn-primary" disabled>
+            🔒 Download slechte reviews deze maand (.txt)
+          </button>
+          <button type="button" id="copy-ai-prompt-btn" class="btn-secondary" disabled>
+            📋 Kopieer klaargezette AI-prompt
+          </button>
+        </div>
+
+        <!-- Klaargezette AI Prompt direct zichtbaar / uitklapbaar naast de knop -->
+        <details style="margin-top: 10px;">
+          <summary style="cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--volvo-blue);">
+            👁️ Bekijk of bewerk de klaargezette AI-prompt (voor ChatGPT / Copilot / Claude)
+          </summary>
+          <div class="ai-prompt-preview" id="ai-prompt-preview-box"></div>
+        </details>
+
+        <!-- Invulvelden voor de AI-conclusie die het vak "Tip van de Maand" op het dashboard vult -->
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(0, 48, 87, 0.1);">
+          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">Hoofdtitel / Kernquote in ‘Tip van de Maand’</label>
+              <input class="glass-input" type="text" id="admin-tip-quote" placeholder="Bijv. Focuspunten deze maand: Duidelijke afspraken &amp; proactieve updates" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">Ondertekening / Bron</label>
+              <input class="glass-input" type="text" id="admin-tip-author" placeholder="Bijv. AI Klantanalyse • Focuspunten" />
+            </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <label style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">
+              Plak hier de AI Focuspunten voor in het vak ‘Tip van de Maand’ (1 focuspunt per regel, <code>**Vetgedrukt**</code> wordt automatisch opgemaakt)
+            </label>
+            <textarea
+              class="glass-textarea"
+              rows="4"
+              id="admin-tip-body"
+              placeholder="• **Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie volledig in de werkorder.&#10;• **Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af.&#10;• **Houd de klant op de hoogte** van de voortgang. Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stap 4: 1 bestand genereren voor GitHub map 'maandoverzichten' -->
+      <div style="margin-top: 18px;">
+        <strong style="font-size: 0.92rem; display: block; margin-bottom: 8px;">Stap 4: Sla het maandoverzicht op &amp; publiceer</strong>
+        <div class="action-buttons-row" style="margin-top: 0;">
+          <button id="download-datajs-btn" class="btn-primary">
+            ⬇️ Download <code>data.js</code> (voor map <code>maandoverzichten/</code>)
+          </button>
+          <button id="apply-preview-btn" class="btn-secondary">
+            👁️ Direct bekijken in dashboard
+          </button>
+        </div>
       </div>
 
       <!-- Extra: 1-klik Direct naar GitHub pushen -->
@@ -2905,11 +3020,40 @@
       tipReviewIdx = 0;
       renderReviews();
 
-      // Tip van de Maand & Focuspunten
-      const tip = appData.tipOfTheMonth || {};
-      document.getElementById("tip-month-quote").textContent = `“${tip.quote || "Doe alsof het je eigen auto is"}”`;
-      document.getElementById("tip-month-body").textContent = tip.body || "";
-      document.getElementById("tip-month-author").textContent = tip.author || "Customer Champion";
+      // Tip van de Maand & Focuspunten (per maand of algemeen, met automatische opmaak voor focuspunten)
+      const tipByMonth = (appData.tipsByMonth && appData.tipsByMonth[currentMonth]) || appData.tipOfTheMonth || {};
+      document.getElementById("tip-month-quote").textContent = `“${tipByMonth.quote || "Doe alsof het je eigen auto is"}”`;
+      document.getElementById("tip-month-author").textContent = tipByMonth.author || "Customer Champion";
+
+      const tipBodyEl = document.getElementById("tip-month-body");
+      const rawTipBody = String(tipByMonth.body || "").trim();
+      const escapeHtml = (s) => String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+      const formatBoldAndBullets = (line) => {
+        const cleaned = line.replace(/^\s*(?:[•\-*]|\d+[.)])\s*/, "").trim();
+        let safe = escapeHtml(cleaned);
+        if (safe.includes("**")) {
+          safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        } else {
+          // Maak automatisch de eerste korte zin / aanhef vetgedrukt als die op een punt of dubbele punt eindigt (zoals in het voorbeeld)
+          safe = safe.replace(/^([^.!?:]{4,68}[.:])(\s+.*)$/, "<strong>$1</strong>$2");
+        }
+        return safe;
+      };
+
+      if (!rawTipBody) {
+        tipBodyEl.innerHTML = "";
+      } else {
+        const lines = rawTipBody.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length > 1 || /^[•\-*]/.test(rawTipBody)) {
+          tipBodyEl.innerHTML = `<ul class="tip-month-points">${lines.map(l => `<li>${formatBoldAndBullets(l)}</li>`).join("")}</ul>`;
+        } else {
+          tipBodyEl.innerHTML = `<p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5; margin-top: 8px;">${formatBoldAndBullets(rawTipBody)}</p>`;
+        }
+      }
 
       const leftList = document.getElementById("focus-list-left");
       const rightList = document.getElementById("focus-list-right");
@@ -3030,6 +3174,97 @@
       }
     });
 
+    // Hulpfuncties voor Stap 3: Anonieme slechte reviews (Tip reviews / Leermomenten) & AI Prompt
+    function getAnonymousBadReviewsForMonth(monthStr) {
+      const all = appData.responses || [];
+      return all.filter(r =>
+        r.month === monthStr &&
+        typeof r.osat === "number" &&
+        r.osat <= 8 &&
+        r.comment &&
+        r.comment.trim().length > 6 &&
+        !["nee", "geen", "nvt", "n.v.t.", "-", "niks", "niets"].includes(r.comment.trim().toLowerCase())
+      );
+    }
+
+    function scrubPersonalNames(text, pstName) {
+      let cleaned = String(text || "").trim();
+      if (pstName) {
+        const parts = String(pstName).split(/\s+/).filter(p => p.length >= 3);
+        parts.forEach(part => {
+          const escaped = part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          cleaned = cleaned.replace(new RegExp(`\\b${escaped}\\b`, "gi"), "[Medewerker]");
+        });
+      }
+      return cleaned;
+    }
+
+    function buildAiPromptText(monthStr, badReviews) {
+      const mLabel = formatMonthLabel(monthStr);
+      const count = badReviews.length;
+      const reviewLines = badReviews.map((r, i) => {
+        const anonComment = scrubPersonalNames(r.comment, r.pst);
+        const begripStr = r.begrip !== null && r.begrip !== undefined ? `${r.begrip}/5` : "n.v.t.";
+        const toelStr = r.toelichting !== null && r.toelichting !== undefined ? `${r.toelichting}/5` : "n.v.t.";
+        const rftitStr = r.rftit === true ? "Ja" : r.rftit === false ? "Nee" : "n.v.t.";
+        return `${i + 1}. [Score: ${r.osat}/10 | Begrip klantbehoefte: ${begripStr} | Ontvangen toelichting: ${toelStr} | In 1x goed (RFTIT): ${rftitStr}] "${anonComment}"`;
+      }).join("\n");
+
+      return `Je bent een kwaliteits- en klanttevredenheidscoach voor de werkplaats en receptie (PST / Service Adviseurs) van autobedrijf Volvo Rutten.
+Hieronder staan ${count} volledig geanonimiseerde klantreacties uit ${mLabel} met een lagere tevredenheidsscore (score t/m 8 — onze "Tip Reviews / Leermomenten").
+
+OPDRACHT:
+Analyseer de rode draad in deze anonieme klantopmerkingen en vat ze samen in exact 3 concrete, positief en actiegericht geformuleerde FOCUSPUNTEN voor ons serviceteam om te plaatsen in het vak "Tip van de Maand" op ons dashboard.
+
+VEREISTE OPMAAK VAN JE ANTWOORD:
+1. Geef eerst 1 korte, krachtige overkoepelende zin als **Hoofdtitel / Kernquote** (max. 10 woorden).
+2. Geef daarna exact **3 bullets (Focuspunten)** volgens exact deze stijl en opbouw:
+• **[Korte actiegericht vetgedrukte kernzin met punt.]** [1 tot 2 praktische zinnen met uitleg hoe we dit aan de balie of in de werkplaats toepassen en wat het de klant oplevert.]
+
+Voorbeeld van de gewenste stijl:
+• **Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie en bijzonderheden zo duidelijk en volledig mogelijk in de werkorder.
+• **Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af met de klant.
+• **Houd de klant op de hoogte van de voortgang.** Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten. Dit zorgt voor transparantie en voorkomt verrassingen bij de factuur.
+
+ANONIEME LEERMOMENT-REVIEWS (${mLabel.toUpperCase()} — ${count} REACTIES):
+${reviewLines || "(Nog geen slechte reviews geladen voor deze maand)"}`;
+    }
+
+    function updateBadReviewsWorkflowUI() {
+      const targetM = document.getElementById("admin-target-month").value || currentMonth;
+      const badReviews = getAnonymousBadReviewsForMonth(targetM);
+      const dlBtn = document.getElementById("download-bad-reviews-btn");
+      const copyBtn = document.getElementById("copy-ai-prompt-btn");
+      const statusEl = document.getElementById("bad-reviews-status");
+      const pillEl = document.getElementById("bad-reviews-count-pill");
+      const previewEl = document.getElementById("ai-prompt-preview-box");
+
+      // Als er voor de geselecteerde maand slechte reviews aanwezig zijn (al eerder geüpload in data.js of net geüpload), staat de knop direct AAN
+      const canUnlock = badReviews.length > 0;
+
+      if (pillEl) {
+        pillEl.textContent = `${badReviews.length} anonieme leermomenten (${formatMonthLabel(targetM)})`;
+      }
+
+      if (previewEl) {
+        previewEl.textContent = buildAiPromptText(targetM, badReviews);
+      }
+
+      if (canUnlock) {
+        dlBtn.disabled = false;
+        copyBtn.disabled = false;
+        dlBtn.innerHTML = `⬇️ Download slechte reviews ${formatMonthLabel(targetM)} (${badReviews.length})`;
+        statusEl.style.color = "var(--green)";
+        statusEl.innerHTML = `✅ <strong>${badReviews.length} anonieme leermoment-reviews</strong> beschikbaar voor ${formatMonthLabel(targetM)}. Download het bestand of kopieer de prompt voor AI.`;
+      } else {
+        dlBtn.disabled = true;
+        copyBtn.disabled = true;
+        dlBtn.innerHTML = `🔒 Download slechte reviews deze maand`;
+        statusEl.style.color = "var(--text-secondary)";
+        statusEl.textContent = `Geen slechte reviews (score ≤ 8 met opmerking) gevonden voor ${formatMonthLabel(targetM)}. Upload eerst de gegevens voor deze maand in Stap 1.`;
+      }
+    }
+
     function syncAdminModalFields() {
       const targetM = document.getElementById("admin-target-month").value || currentMonth;
       const ranks = (appData.nationalRanks && appData.nationalRanks[targetM]) || {};
@@ -3037,7 +3272,7 @@
         document.getElementById(`rank-${b}-month`).value = (ranks[b] && ranks[b].monthRank) || "";
         document.getElementById(`rank-${b}-cum`).value = (ranks[b] && ranks[b].cumRank) || "";
       });
-      const tip = appData.tipOfTheMonth || {};
+      const tip = (appData.tipsByMonth && appData.tipsByMonth[targetM]) || appData.tipOfTheMonth || {};
       document.getElementById("admin-tip-quote").value = tip.quote || "";
       document.getElementById("admin-tip-author").value = tip.author || "";
       document.getElementById("admin-tip-body").value = tip.body || "";
@@ -3046,9 +3281,47 @@
       document.getElementById("gh-repo").value = localStorage.getItem("vr_gh_repo") || "";
       document.getElementById("gh-branch").value = localStorage.getItem("vr_gh_branch") || "main";
       document.getElementById("gh-token").value = localStorage.getItem("vr_gh_token") || "";
+
+      updateBadReviewsWorkflowUI();
     }
 
     document.getElementById("admin-target-month").addEventListener("change", syncAdminModalFields);
+
+    // Download-knop voor ANONIEME slechte reviews + klaargezette AI-prompt in 1 tekstbestand
+    document.getElementById("download-bad-reviews-btn").addEventListener("click", () => {
+      const targetM = document.getElementById("admin-target-month").value || currentMonth;
+      const badReviews = getAnonymousBadReviewsForMonth(targetM);
+      if (!badReviews.length) return;
+
+      const fullPromptAndReviews = buildAiPromptText(targetM, badReviews);
+      const blob = new Blob([fullPromptAndReviews], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeMonth = formatMonthLabel(targetM).replace(/\s+/g, "_");
+      a.href = url;
+      a.download = `Anonieme_Slechte_Reviews_${safeMonth}_Volvo_Rutten.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Kopieer-knop voor de klaargezette AI-prompt (inclusief de anonieme reviews van die maand)
+    document.getElementById("copy-ai-prompt-btn").addEventListener("click", async () => {
+      const targetM = document.getElementById("admin-target-month").value || currentMonth;
+      const badReviews = getAnonymousBadReviewsForMonth(targetM);
+      const promptStr = buildAiPromptText(targetM, badReviews);
+      const btn = document.getElementById("copy-ai-prompt-btn");
+      try {
+        await navigator.clipboard.writeText(promptStr);
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✅ Prompt + anonieme reviews gekopieerd!";
+        setTimeout(() => { btn.innerHTML = orig; }, 2600);
+      } catch (_) {
+        const previewDetails = document.getElementById("ai-prompt-preview-box").parentElement;
+        if (previewDetails) previewDetails.open = true;
+      }
+    });
 
     // Drag & drop Excel
     const dropzone = document.getElementById("excel-dropzone");
@@ -3192,8 +3465,9 @@
           populateMonthSelectors();
           syncAdminModalFields();
 
+          const badCount = getAnonymousBadReviewsForMonth(appData.latestMonth).length;
           document.getElementById("upload-parse-status").style.color = "var(--green)";
-          document.getElementById("upload-parse-status").textContent = `✅ ${parsed.length} Service-reacties succesvol verwerkt (${uniqueMonths.length} maanden, nieuwste: ${formatMonthLabel(appData.latestMonth)}).`;
+          document.getElementById("upload-parse-status").textContent = `✅ ${parsed.length} Service-reacties succesvol verwerkt (${uniqueMonths.length} maanden, nieuwste: ${formatMonthLabel(appData.latestMonth)} • ${badCount} anonieme leermomenten klaar bij Stap 3).`;
         } catch (err) {
           console.error(err);
           document.getElementById("upload-parse-status").style.color = "var(--red)";
@@ -3227,11 +3501,14 @@
         cumRank: cRanks.length ? Math.round(cRanks.reduce((a, b) => a + b, 0) / cRanks.length) : null
       };
 
-      appData.tipOfTheMonth = {
+      const tipObj = {
         quote: document.getElementById("admin-tip-quote").value.trim() || "Doe alsof het je eigen auto is",
         author: document.getElementById("admin-tip-author").value.trim() || "Customer Champion",
         body: document.getElementById("admin-tip-body").value.trim() || ""
       };
+      appData.tipOfTheMonth = tipObj;
+      if (!appData.tipsByMonth) appData.tipsByMonth = {};
+      appData.tipsByMonth[targetM] = tipObj;
 
       appData.latestMonth = targetM;
       appData.version = new Date().toISOString();
