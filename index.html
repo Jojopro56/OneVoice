@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -122,9 +123,17 @@
     }
 
     @keyframes ambientFloat {
-      0% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(45px, 28px, 0) scale(1.07); }
-      100% { transform: translate3d(-25px, 50px, 0) scale(0.96); }
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate3d(45px, 28px, 0) scale(1.07);
+      }
+
+      100% {
+        transform: translate3d(-25px, 50px, 0) scale(0.96);
+      }
     }
 
     /* ==================== APPLE GLASS SURFACE SYSTEM ==================== */
@@ -160,6 +169,7 @@
         box-shadow: var(--glass-shadow-hover);
         border-color: rgba(255, 255, 255, 0.96);
       }
+
       .glass-card:hover::before {
         opacity: 1;
       }
@@ -172,6 +182,7 @@
         transform: translateY(22px) scale(0.985);
         filter: blur(6px);
       }
+
       100% {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -180,8 +191,15 @@
     }
 
     @keyframes pulseRefresh {
-      0% { opacity: 0.55; transform: translateY(6px) scale(0.992); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+      0% {
+        opacity: 0.55;
+        transform: translateY(6px) scale(0.992);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .animate-in {
@@ -282,9 +300,21 @@
     }
 
     @keyframes shakeError {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-8px); }
-      40%, 80% { transform: translateX(8px); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-8px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(8px);
+      }
     }
 
     .login-card.shake {
@@ -331,7 +361,9 @@
       padding-left: 4px;
     }
 
-    .glass-input, .glass-select, .glass-textarea {
+    .glass-input,
+    .glass-select,
+    .glass-textarea {
       width: 100%;
       padding: 13px 16px;
       border-radius: var(--radius-md);
@@ -347,7 +379,9 @@
       transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, transform 0.18s ease;
     }
 
-    .glass-input:focus, .glass-select:focus, .glass-textarea:focus {
+    .glass-input:focus,
+    .glass-select:focus,
+    .glass-textarea:focus {
       background: #ffffff;
       border-color: var(--volvo-blue);
       box-shadow: 0 0 0 4px rgba(28, 107, 186, 0.15), 0 4px 12px rgba(0, 48, 87, 0.05);
@@ -605,8 +639,15 @@
     }
 
     @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-14px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(-14px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     /* Page Context Header */
@@ -729,13 +770,41 @@
       transition: transform 0.25s var(--spring-ease), background 0.25s ease;
     }
 
-    .delta-up { background: rgba(34, 197, 94, 0.24); color: #86efac; border: 1px solid rgba(134, 239, 172, 0.25); }
-    .delta-down { background: rgba(248, 113, 113, 0.24); color: #fca5a5; border: 1px solid rgba(252, 165, 165, 0.25); }
-    .delta-neutral { background: rgba(255, 255, 255, 0.14); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.14); }
+    .delta-up {
+      background: rgba(34, 197, 94, 0.24);
+      color: #86efac;
+      border: 1px solid rgba(134, 239, 172, 0.25);
+    }
 
-    .delta-light-up { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22, 163, 74, 0.18); }
-    .delta-light-down { background: var(--red-bg); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.18); }
-    .delta-light-neutral { background: rgba(82, 96, 113, 0.09); color: var(--text-secondary); border: 1px solid rgba(82, 96, 113, 0.12); }
+    .delta-down {
+      background: rgba(248, 113, 113, 0.24);
+      color: #fca5a5;
+      border: 1px solid rgba(252, 165, 165, 0.25);
+    }
+
+    .delta-neutral {
+      background: rgba(255, 255, 255, 0.14);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .delta-light-up {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(22, 163, 74, 0.18);
+    }
+
+    .delta-light-down {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(220, 38, 38, 0.18);
+    }
+
+    .delta-light-neutral {
+      background: rgba(82, 96, 113, 0.09);
+      color: var(--text-secondary);
+      border: 1px solid rgba(82, 96, 113, 0.12);
+    }
 
     /* Circular SVG Gauge */
     .ring-wrap {
@@ -773,8 +842,15 @@
     }
 
     @keyframes starPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.12); }
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.12);
+      }
     }
 
     /* Standard KPI Glass Card */
@@ -847,7 +923,9 @@
     }
 
     @keyframes barShimmer {
-      100% { transform: translateX(100%); }
+      100% {
+        transform: translateX(100%);
+      }
     }
 
     /* ==================== CUSTOMER HERO (PST) ==================== */
@@ -1041,8 +1119,15 @@
     }
 
     @keyframes floatCrown {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-3px) rotate(6deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-3px) rotate(6deg);
+      }
     }
 
     .pst-leaderboard {
@@ -1177,9 +1262,23 @@
       transition: transform 0.2s ease;
     }
 
-    .chip-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22, 163, 74, 0.18); }
-    .chip-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(217, 119, 6, 0.2); }
-    .chip-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.18); }
+    .chip-green {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(22, 163, 74, 0.18);
+    }
+
+    .chip-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    .chip-red {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(220, 38, 38, 0.18);
+    }
 
     .month-history-strip {
       display: grid;
@@ -1240,8 +1339,15 @@
     }
 
     @keyframes quoteFadeIn {
-      0% { opacity: 0; transform: translateY(6px) scale(0.99); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+      0% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.99);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .review-nav {
@@ -1363,13 +1469,25 @@
     }
 
     @keyframes fadeInBackdrop {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     @keyframes modalSpringIn {
-      0% { opacity: 0; transform: translateY(24px) scale(0.96); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .modal-card {
@@ -1399,7 +1517,8 @@
       transition: all 0.24s var(--spring-ease);
     }
 
-    .dropzone:hover, .dropzone.dragover {
+    .dropzone:hover,
+    .dropzone.dragover {
       border-color: var(--volvo-blue);
       background: rgba(28, 107, 186, 0.07);
       transform: scale(1.01);
@@ -1607,9 +1726,17 @@
 
     /* ==================== MOBILE & TABLET RESPONSIVE UX ==================== */
     @media (max-width: 1120px) {
-      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .mid-grid { grid-template-columns: minmax(0, 1fr); }
-      .bottom-grid { grid-template-columns: minmax(0, 1fr); }
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mid-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .bottom-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     @media (max-width: 820px) {
@@ -1619,19 +1746,23 @@
         gap: 10px;
         border-radius: 20px;
       }
+
       .brand-logo-topbar {
         order: 1;
       }
+
       .topbar-controls {
         order: 2;
         margin-left: auto;
         gap: 6px;
       }
+
       .segmented-control {
         order: 3;
         width: 100%;
         justify-content: space-between;
       }
+
       .seg-btn {
         flex: 1;
         text-align: center;
@@ -1641,16 +1772,20 @@
     }
 
     @media (max-width: 680px) {
-      html, body {
+
+      html,
+      body {
         max-width: 100vw;
         overflow-x: hidden;
       }
+
       #app-container {
         width: 100%;
         max-width: 100%;
         padding: 10px 12px 44px;
         overflow-x: hidden;
       }
+
       .kpi-grid,
       .mid-grid,
       .bottom-grid,
@@ -1658,55 +1793,68 @@
         min-width: 0;
         max-width: 100%;
       }
+
       .login-card {
         padding: 32px 22px;
         border-radius: 24px;
       }
+
       .brand-logo-login {
         padding: 12px 20px;
       }
+
       .brand-logo-login .brand-logo-img {
         height: 36px;
       }
+
       .brand-logo-topbar {
         padding: 5px 10px;
         border-radius: 12px;
       }
+
       .brand-logo-topbar .brand-logo-img {
         height: 22px;
       }
+
       .topbar-controls {
         gap: 5px;
       }
+
       .icon-pill-btn {
         padding: 7px 10px;
         font-size: 0.75rem;
         min-height: 36px;
       }
+
       #notif-label,
       .upload-btn-text {
         display: none;
       }
+
       .month-pill-select {
         padding: 6px 9px;
         font-size: 0.78rem;
         min-height: 36px;
       }
+
       .context-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
         margin-bottom: 14px;
       }
+
       /* Compact 2-column sub-layout for national rank cards on mobile */
       .kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
       }
-      .kpi-grid > .osat-hero-card,
-      .kpi-grid > .stat-card:last-child {
+
+      .kpi-grid>.osat-hero-card,
+      .kpi-grid>.stat-card:last-child {
         grid-column: 1 / -1;
       }
+
       .osat-hero-card,
       .stat-card,
       .hero-pst-card,
@@ -1716,13 +1864,16 @@
         padding: 18px 15px;
         border-radius: 22px;
       }
+
       .rank-number {
         font-size: 1.95rem;
         margin: 8px 0 6px;
       }
+
       .rank-number span {
         font-size: 0.95rem;
       }
+
       /* Mobiele weergave Customer Hero van de Maand */
       .hero-spotlight {
         flex-direction: column;
@@ -1731,56 +1882,67 @@
         gap: 12px;
         margin: 12px 0 16px;
       }
+
       .hero-spotlight-main {
         flex: 1 1 auto;
         width: 100%;
         gap: 12px;
       }
+
       #hero-name {
         font-size: 1.12rem !important;
         line-height: 1.2;
         word-break: break-word;
       }
+
       #hero-branch-meta,
       #hero-osat-meta {
         font-size: 0.78rem !important;
         line-height: 1.35;
       }
+
       .btn-voucher {
         width: 100%;
         padding: 10px 14px;
         font-size: 0.84rem;
       }
+
       .pst-row {
         padding: 10px 12px;
         gap: 8px;
       }
+
       .pst-row-text {
         display: flex;
         flex-direction: column;
         min-width: 0;
       }
+
       .pst-row-text strong {
         font-size: 0.85rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
       .pst-row-sub {
         margin-left: 0;
         margin-top: 1px;
         font-size: 0.73rem;
       }
+
       /* Mobiele weergave Overzicht per Vestiging: verberg brede tabel, toon mobiele kaarten */
       .glass-table-wrap {
         display: none;
       }
+
       .mobile-branch-cards {
         display: flex;
         flex-direction: column;
         gap: 10px;
         margin-top: 12px;
       }
+
       .mobile-branch-card {
         padding: 12px 13px;
         border-radius: 16px;
@@ -1790,13 +1952,16 @@
         cursor: pointer;
         transition: transform 0.2s var(--spring-ease), background 0.2s ease;
       }
+
       .mobile-branch-card:active {
         transform: scale(0.985);
       }
+
       .mobile-branch-card.active-branch-card {
         background: linear-gradient(135deg, rgba(0, 48, 87, 0.09), rgba(255, 255, 255, 0.85));
         border-color: rgba(0, 48, 87, 0.28);
       }
+
       .mobile-branch-head {
         display: flex;
         align-items: center;
@@ -1806,11 +1971,13 @@
         padding-bottom: 8px;
         border-bottom: 1px solid rgba(0, 48, 87, 0.07);
       }
+
       .mobile-branch-title {
         font-size: 0.92rem;
         font-weight: 800;
         color: var(--volvo-navy);
       }
+
       .mobile-branch-meta {
         font-size: 0.74rem;
         font-weight: 600;
@@ -1819,18 +1986,21 @@
         padding: 3px 9px;
         border-radius: 999px;
       }
+
       .mobile-branch-kpis {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 6px;
         text-align: center;
       }
+
       .mobile-kpi-col {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 4px;
       }
+
       .mobile-kpi-lbl {
         font-size: 0.65rem;
         font-weight: 700;
@@ -1838,41 +2008,68 @@
         letter-spacing: 0.03em;
         color: var(--text-muted);
       }
+
       .mobile-kpi-col .kpi-chip {
         width: 100%;
         min-width: 0;
         padding: 4px 4px;
         font-size: 0.76rem;
       }
+
       .voucher-studio-grid {
         grid-template-columns: 1fr;
       }
+
       .gift-choice-grid {
         grid-template-columns: 1fr;
       }
+
       .hero-avatar {
         width: 52px;
         height: 52px;
         font-size: 1.2rem;
       }
-      .focus-columns { grid-template-columns: 1fr; gap: 12px; }
-      .rank-inputs-grid { grid-template-columns: 1fr; }
-      .action-buttons-row { grid-template-columns: 1fr; }
-      .ai-actions-grid { grid-template-columns: 1fr; }
-      .month-history-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+      .focus-columns {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .rank-inputs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons-row {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-actions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .month-history-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
       /* Bottom-sheet modal on mobile + 16px inputs to prevent iOS zoom */
       .modal-backdrop {
         align-items: flex-end;
         padding: 0;
       }
+
       .modal-card {
         max-height: 92dvh;
         padding: 22px 18px 30px;
         border-radius: 26px 26px 0 0;
       }
-      .glass-input, .glass-select, .glass-textarea {
+
+      .glass-input,
+      .glass-select,
+      .glass-textarea {
         font-size: 16px;
       }
+
       .glass-footer {
         flex-direction: column;
         text-align: center;
@@ -1884,6 +2081,7 @@
       .kpi-grid {
         grid-template-columns: 1fr;
       }
+
       .seg-btn {
         font-size: 0.76rem;
         padding: 8px 6px;
@@ -1891,6 +2089,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="ambient-bg"></div>
 
@@ -1904,16 +2103,19 @@
       <div>
         <div class="login-badge">✦ Customer Champion Portal</div>
       </div>
-      <p class="login-subtitle">Log in om de maandelijkse klanttevredenheid, CSA-scores en Customer Hero resultaten van Volvo Rutten te bekijken.</p>
+      <p class="login-subtitle">Log in om de maandelijkse klanttevredenheid, CSA-scores en Customer Hero resultaten van
+        Volvo Rutten te bekijken.</p>
 
       <form class="login-form" id="login-form">
         <div class="input-group">
           <label for="login-user">Gebruikersnaam</label>
-          <input class="glass-input" type="text" id="login-user" placeholder="Bijv. VolvoRutten" autocomplete="username" required />
+          <input class="glass-input" type="text" id="login-user" placeholder="Bijv. VolvoRutten" autocomplete="username"
+            required />
         </div>
         <div class="input-group">
           <label for="login-pass">Wachtwoord</label>
-          <input class="glass-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" required />
+          <input class="glass-input" type="password" id="login-pass" placeholder="••••••••"
+            autocomplete="current-password" required />
         </div>
         <div class="remember-row">
           <label><input type="checkbox" id="login-remember" checked /> Ingelogd blijven</label>
@@ -1959,11 +2161,14 @@
     <div id="update-banner">
       <div>
         <strong style="font-size: 0.95rem;">🎉 Nieuw Maandoverzicht beschikbaar!</strong>
-        <div id="update-banner-text" style="font-size: 0.84rem; opacity: 0.88; margin-top: 2px;">Bekijk direct de nieuwste resultaten van Volvo Rutten.</div>
+        <div id="update-banner-text" style="font-size: 0.84rem; opacity: 0.88; margin-top: 2px;">Bekijk direct de
+          nieuwste resultaten van Volvo Rutten.</div>
       </div>
       <div style="display: flex; gap: 8px;">
-        <button id="view-latest-btn" class="icon-pill-btn" style="background: #F5C400; color: #111827; border: none;">Bekijk resultaten</button>
-        <button id="dismiss-banner-btn" class="icon-pill-btn" style="background: rgba(255,255,255,0.16); color: #fff; border: none;">✕</button>
+        <button id="view-latest-btn" class="icon-pill-btn"
+          style="background: #F5C400; color: #111827; border: none;">Bekijk resultaten</button>
+        <button id="dismiss-banner-btn" class="icon-pill-btn"
+          style="background: rgba(255,255,255,0.16); color: #fff; border: none;">✕</button>
       </div>
     </div>
 
@@ -1971,9 +2176,11 @@
     <div class="context-header animate-in" style="--delay: 40ms;">
       <div>
         <h1 class="context-title" id="dashboard-heading">Volvo Rutten — Oktober 2026</h1>
-        <p class="context-meta" id="dashboard-subheading">Aftersales &amp; Service Klanttevredenheid • Bron: One Voice Portal</p>
+        <p class="context-meta" id="dashboard-subheading">Aftersales &amp; Service Klanttevredenheid • Bron: One Voice
+          Portal</p>
       </div>
-      <div class="glass-card" style="padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: var(--volvo-navy);">
+      <div class="glass-card"
+        style="padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: var(--volvo-navy);">
         <span id="respondent-badge">0 respondenten</span> • <span id="tens-total-badge">0× een 10</span>
       </div>
     </div>
@@ -1994,7 +2201,8 @@
           <div class="ring-wrap">
             <svg viewBox="0 0 74 74">
               <circle cx="37" cy="37" r="30" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="7" />
-              <circle id="osat-ring-circle" cx="37" cy="37" r="30" fill="none" stroke="#22c55e" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" />
+              <circle id="osat-ring-circle" cx="37" cy="37" r="30" fill="none" stroke="#22c55e" stroke-width="7"
+                stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" />
             </svg>
             <div class="ring-star">★</div>
           </div>
@@ -2014,7 +2222,8 @@
             <span style="font-size: 0.76rem; color: var(--text-muted);">t.o.v. vorige maand</span>
           </div>
         </div>
-        <div style="font-size: 0.78rem; color: var(--text-secondary); border-top: 1px solid rgba(0,48,87,0.08); padding-top: 10px; margin-top: 14px;">
+        <div
+          style="font-size: 0.78rem; color: var(--text-secondary); border-top: 1px solid rgba(0,48,87,0.08); padding-top: 10px; margin-top: 14px;">
           Landelijke ranking Nederlandse Volvo-dealers
         </div>
       </article>
@@ -2028,7 +2237,8 @@
             🎯 Doel: Top 20 van Nederland
           </div>
         </div>
-        <div style="font-size: 0.78rem; color: var(--text-secondary); border-top: 1px solid rgba(0,48,87,0.08); padding-top: 10px; margin-top: 14px;">
+        <div
+          style="font-size: 0.78rem; color: var(--text-secondary); border-top: 1px solid rgba(0,48,87,0.08); padding-top: 10px; margin-top: 14px;">
           Jaarstand Volvo Cars Nederland
         </div>
       </article>
@@ -2042,21 +2252,27 @@
               <span>Begrip klantbehoefte <small style="color:var(--text-muted)">(doel 69%)</small></span>
               <strong id="kpi-begrip-val">--%</strong>
             </div>
-            <div class="csa-bar-track"><div id="kpi-begrip-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div></div>
+            <div class="csa-bar-track">
+              <div id="kpi-begrip-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div>
+            </div>
           </div>
           <div>
             <div class="csa-item-head">
               <span>Ontvangen toelichting <small style="color:var(--text-muted)">(doel 66%)</small></span>
               <strong id="kpi-toelichting-val">--%</strong>
             </div>
-            <div class="csa-bar-track"><div id="kpi-toelichting-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div></div>
+            <div class="csa-bar-track">
+              <div id="kpi-toelichting-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div>
+            </div>
           </div>
           <div>
             <div class="csa-item-head">
               <span>Right First Time (RFTIT) <small style="color:var(--text-muted)">(doel 93%)</small></span>
               <strong id="kpi-rftit-val">--%</strong>
             </div>
-            <div class="csa-bar-track"><div id="kpi-rftit-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div></div>
+            <div class="csa-bar-track">
+              <div id="kpi-rftit-bar" class="csa-bar-fill" style="width:0%; background: var(--green);"></div>
+            </div>
           </div>
         </div>
       </article>
@@ -2079,12 +2295,16 @@
                 <span class="hero-crown">👑</span>
               </div>
               <div style="min-width: 0;">
-                <div style="font-size: 1.25rem; font-weight: 800; color: var(--volvo-navy);" id="hero-name">Niels Muijres</div>
-                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;" id="hero-branch-meta">Vestiging Venlo • 4× een 10 deze maand</div>
-                <div style="font-size: 0.8rem; font-weight: 600; color: var(--green); margin-top: 4px;" id="hero-osat-meta">100% OSAT • Super gedaan!</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--volvo-navy);" id="hero-name">Niels
+                  Muijres</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;" id="hero-branch-meta">
+                  Vestiging Venlo • 4× een 10 deze maand</div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--green); margin-top: 4px;"
+                  id="hero-osat-meta">100% OSAT • Super gedaan!</div>
               </div>
             </div>
-            <button type="button" class="btn-voucher" id="open-voucher-btn" title="Genereer en download A4 Cadeaubon PDF">
+            <button type="button" class="btn-voucher" id="open-voucher-btn"
+              title="Genereer en download A4 Cadeaubon PDF">
               <span>🎁</span>
               <span>Maak Cadeaubon</span>
             </button>
@@ -2100,7 +2320,8 @@
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span class="card-kicker">Overzicht per Vestiging &amp; Historie</span>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Klik op een vestiging om te filteren • Groen = op doel</span>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Klik op een vestiging om te filteren • Groen =
+              op doel</span>
           </div>
 
           <div class="glass-table-wrap">
@@ -2159,10 +2380,12 @@
         </div>
       </article>
 
-      <article class="glass-card review-card animate-in" style="--delay: 560ms; background: linear-gradient(145deg, rgba(255,255,255,0.84), rgba(0,48,87,0.06));">
+      <article class="glass-card review-card animate-in"
+        style="--delay: 560ms; background: linear-gradient(145deg, rgba(255,255,255,0.84), rgba(0,48,87,0.06));">
         <div>
           <div class="card-kicker" style="color: var(--volvo-navy);">🎯 Tip van de Maand (Focuspunten)</div>
-          <div class="quote-box" style="font-style: normal; font-weight: 700; color: var(--volvo-navy);" id="tip-month-quote">“Doe alsof het je eigen auto is”</div>
+          <div class="quote-box" style="font-style: normal; font-weight: 700; color: var(--volvo-navy);"
+            id="tip-month-quote">“Doe alsof het je eigen auto is”</div>
           <div id="tip-month-body"></div>
         </div>
         <div class="review-nav" style="margin-top: 12px;">
@@ -2177,7 +2400,8 @@
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <div>
           <div class="card-kicker">Actiepunten voor het Team</div>
-          <h2 style="font-size: 1.18rem; font-weight: 700; margin-top: 3px;">Focuspunten: Begrip van klantbehoefte &amp; Ontvangen toelichting</h2>
+          <h2 style="font-size: 1.18rem; font-weight: 700; margin-top: 3px;">Focuspunten: Begrip van klantbehoefte &amp;
+            Ontvangen toelichting</h2>
         </div>
         <span style="font-size: 0.8rem; color: var(--text-muted);">Praktische handvatten voor elke werkorder</span>
       </div>
@@ -2205,7 +2429,8 @@
             <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
           </div>
           <div class="card-kicker">Beheer &amp; Maandupdate</div>
-          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--volvo-navy);">Nieuw Maandoverzicht Genereren</h2>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--volvo-navy);">Nieuw Maandoverzicht Genereren
+          </h2>
         </div>
         <button id="close-upload-btn" class="icon-pill-btn">✕ Sluiten</button>
       </div>
@@ -2215,11 +2440,14 @@
         <strong style="font-size: 0.92rem;">Stap 1: Sleep jouw One Voice Excel-export hierin</strong>
         <div class="dropzone" id="excel-dropzone">
           <div style="font-size: 1.8rem; margin-bottom: 6px;">📊</div>
-          <div style="font-weight: 700; color: var(--volvo-navy);">Klik of sleep <code>Volvo_Cars_Responses_Export.xlsx</code> hierheen</div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Filtert automatisch op <em>Type evenement = Service</em> en herkent Echt, Venlo &amp; Boxmeer</div>
+          <div style="font-weight: 700; color: var(--volvo-navy);">Klik of sleep
+            <code>Volvo_Cars_Responses_Export.xlsx</code> hierheen</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Filtert automatisch op <em>Type
+              evenement = Service</em> en herkent Echt, Venlo &amp; Boxmeer</div>
           <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" style="display:none;" />
         </div>
-        <div id="upload-parse-status" style="margin-top: 10px; font-size: 0.86rem; font-weight: 600; color: var(--green);"></div>
+        <div id="upload-parse-status"
+          style="margin-top: 10px; font-size: 0.86rem; font-weight: 600; color: var(--green);"></div>
       </div>
 
       <!-- Stap 2: 3 handmatige cijfers per vestiging -->
@@ -2233,22 +2461,28 @@
           <div class="rank-box">
             <h4>📍 Echt (6NL134000)</h4>
             <div class="rank-pair">
-              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Echt-month" min="1" max="82" placeholder="16" /></div>
-              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Echt-cum" min="1" max="82" placeholder="19" /></div>
+              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Echt-month" min="1"
+                  max="82" placeholder="16" /></div>
+              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Echt-cum" min="1" max="82"
+                  placeholder="19" /></div>
             </div>
           </div>
           <div class="rank-box">
             <h4>📍 Venlo (6NL178800)</h4>
             <div class="rank-pair">
-              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Venlo-month" min="1" max="82" placeholder="14" /></div>
-              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Venlo-cum" min="1" max="82" placeholder="17" /></div>
+              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Venlo-month" min="1"
+                  max="82" placeholder="14" /></div>
+              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Venlo-cum" min="1"
+                  max="82" placeholder="17" /></div>
             </div>
           </div>
           <div class="rank-box">
             <h4>📍 Boxmeer (6NL199600)</h4>
             <div class="rank-pair">
-              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Boxmeer-month" min="1" max="82" placeholder="22" /></div>
-              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Boxmeer-cum" min="1" max="82" placeholder="24" /></div>
+              <div><label>Maand (#/82)</label><input class="glass-input" type="number" id="rank-Boxmeer-month" min="1"
+                  max="82" placeholder="22" /></div>
+              <div><label>Cumulatief</label><input class="glass-input" type="number" id="rank-Boxmeer-cum" min="1"
+                  max="82" placeholder="24" /></div>
             </div>
           </div>
         </div>
@@ -2258,12 +2492,16 @@
       <div class="ai-workflow-box">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
           <div>
-            <strong style="font-size: 0.92rem; color: var(--volvo-navy);">Stap 3: Genereer ‘Tip van de Maand’ &amp; Focuspunten met AI (100% Anoniem)</strong>
+            <strong style="font-size: 0.92rem; color: var(--volvo-navy);">Stap 3: Genereer ‘Tip van de Maand’ &amp;
+              Focuspunten met AI (100% Anoniem)</strong>
             <div id="bad-reviews-status" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">
-              Upload eerst het Excel-bestand in Stap 1 (of selecteer een maand met verbeterpunten) om de anonieme leermomenten te kunnen downloaden.
+              Upload eerst het Excel-bestand in Stap 1 (of selecteer een maand met verbeterpunten) om de anonieme
+              leermomenten te kunnen downloaden.
             </div>
           </div>
-          <span id="bad-reviews-count-pill" class="tens-pill" style="background: rgba(0, 48, 87, 0.08); border-color: rgba(0, 48, 87, 0.18); color: var(--volvo-navy);">0 leermomenten</span>
+          <span id="bad-reviews-count-pill" class="tens-pill"
+            style="background: rgba(0, 48, 87, 0.08); border-color: rgba(0, 48, 87, 0.18); color: var(--volvo-navy);">0
+            leermomenten</span>
         </div>
 
         <!-- Knoppen naast elkaar: 1. Download slechte reviews deze maand (grijs totdat data er is) + 2. Kopieer AI Prompt -->
@@ -2288,31 +2526,36 @@
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(0, 48, 87, 0.1);">
           <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">Hoofdtitel / Kernquote in ‘Tip van de Maand’</label>
-              <input class="glass-input" type="text" id="admin-tip-quote" placeholder="Bijv. Focuspunten deze maand: Duidelijke afspraken &amp; proactieve updates" />
+              <label
+                style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">Hoofdtitel
+                / Kernquote in ‘Tip van de Maand’</label>
+              <input class="glass-input" type="text" id="admin-tip-quote"
+                placeholder="Bijv. Focuspunten deze maand: Duidelijke afspraken &amp; proactieve updates" />
             </div>
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">Ondertekening / Bron</label>
-              <input class="glass-input" type="text" id="admin-tip-author" placeholder="Bijv. AI Klantanalyse • Focuspunten" />
+              <label
+                style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">Ondertekening
+                / Bron</label>
+              <input class="glass-input" type="text" id="admin-tip-author"
+                placeholder="Bijv. AI Klantanalyse • Focuspunten" />
             </div>
           </div>
           <div style="margin-top: 10px;">
-            <label style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">
-              Plak hier de AI Focuspunten voor in het vak ‘Tip van de Maand’ (1 focuspunt per regel, <code>**Vetgedrukt**</code> wordt automatisch opgemaakt)
+            <label
+              style="font-size: 0.78rem; font-weight: 700; color: var(--volvo-navy); display: block; margin-bottom: 4px;">
+              Plak hier de AI Focuspunten voor in het vak ‘Tip van de Maand’ (1 focuspunt per regel,
+              <code>**Vetgedrukt**</code> wordt automatisch opgemaakt)
             </label>
-            <textarea
-              class="glass-textarea"
-              rows="4"
-              id="admin-tip-body"
-              placeholder="• **Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie volledig in de werkorder.&#10;• **Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af.&#10;• **Houd de klant op de hoogte** van de voortgang. Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten."
-            ></textarea>
+            <textarea class="glass-textarea" rows="4" id="admin-tip-body"
+              placeholder="• **Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie volledig in de werkorder.&#10;• **Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af.&#10;• **Houd de klant op de hoogte** van de voortgang. Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten."></textarea>
           </div>
         </div>
       </div>
 
       <!-- Stap 4: 1 bestand genereren voor GitHub map 'maandoverzichten' -->
       <div style="margin-top: 18px;">
-        <strong style="font-size: 0.92rem; display: block; margin-bottom: 8px;">Stap 4: Sla het maandoverzicht op &amp; publiceer</strong>
+        <strong style="font-size: 0.92rem; display: block; margin-bottom: 8px;">Stap 4: Sla het maandoverzicht op &amp;
+          publiceer</strong>
         <div class="action-buttons-row" style="margin-top: 0;">
           <button id="download-datajs-btn" class="btn-primary">
             ⬇️ Download <code>data.js</code> (voor map <code>maandoverzichten/</code>)
@@ -2327,21 +2570,27 @@
       <div class="email-studio-box">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
           <div>
-            <strong style="font-size: 0.92rem; color: var(--volvo-navy);">Stap 5: E-mail voor Directie &amp; Management kopiëren (Dashboard-stijl)</strong>
+            <strong style="font-size: 0.92rem; color: var(--volvo-navy);">Stap 5: E-mail voor Directie &amp; Management
+              kopiëren (Dashboard-stijl)</strong>
             <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">
-              Klaar voor verzending na het invullen van Stap 1 t/m 4: kopieert de opgemaakte e-mail (inclusief tabellen, KPI-kleuren, Customer Hero en jouw Focuspunten uit Stap 3) voor direct plakken in Outlook of Gmail.
+              Klaar voor verzending na het invullen van Stap 1 t/m 4: kopieert de opgemaakte e-mail (inclusief tabellen,
+              KPI-kleuren, Customer Hero en jouw Focuspunten uit Stap 3) voor direct plakken in Outlook of Gmail.
             </div>
           </div>
-          <span class="tens-pill" style="background: rgba(22, 163, 74, 0.14); border-color: rgba(22, 163, 74, 0.3); color: var(--green);">Klaar om te plakken</span>
+          <span class="tens-pill"
+            style="background: rgba(22, 163, 74, 0.14); border-color: rgba(22, 163, 74, 0.3); color: var(--green);">Klaar
+            om te plakken</span>
         </div>
 
         <!-- Onderwerpregel met 1-klik kopieerknop -->
         <div class="email-subject-bar">
           <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             <span style="color: var(--text-muted); font-weight: 600;">Onderwerp:</span>
-            <strong id="dir-email-subject" style="color: var(--volvo-navy); margin-left: 4px;">📊 Nieuw Maandoverzicht One Voice Klanttevredenheid — Volvo Rutten</strong>
+            <strong id="dir-email-subject" style="color: var(--volvo-navy); margin-left: 4px;">📊 Nieuw Maandoverzicht
+              One Voice Klanttevredenheid — Volvo Rutten</strong>
           </div>
-          <button type="button" id="copy-email-subject-btn" class="icon-pill-btn" style="padding: 5px 11px; font-size: 0.75rem; flex-shrink: 0;">
+          <button type="button" id="copy-email-subject-btn" class="icon-pill-btn"
+            style="padding: 5px 11px; font-size: 0.75rem; flex-shrink: 0;">
             📋 Kopieer onderwerp
           </button>
         </div>
@@ -2355,7 +2604,8 @@
             📄 Kopieer als platte tekst
           </button>
         </div>
-        <div id="copy-dir-email-status" style="margin-top: 6px; font-size: 0.8rem; font-weight: 600; color: var(--green);"></div>
+        <div id="copy-dir-email-status"
+          style="margin-top: 6px; font-size: 0.8rem; font-weight: 600; color: var(--green);"></div>
 
         <!-- Live voorbeeld van de opgemaakte e-mail -->
         <details style="margin-top: 10px;" open>
@@ -2372,7 +2622,8 @@
           ⚡ Power-workflow: Direct vanuit hier naar GitHub pushen (1 klik)
         </summary>
         <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 8px 0 12px;">
-          Vul eenmalig je GitHub repository en een Personal Access Token (met <em>Contents: Read &amp; Write</em> rechten) in. Deze gegevens worden alleen lokaal in jouw eigen browser bewaard.
+          Vul eenmalig je GitHub repository en een Personal Access Token (met <em>Contents: Read &amp; Write</em>
+          rechten) in. Deze gegevens worden alleen lokaal in jouw eigen browser bewaard.
         </p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <input class="glass-input" type="text" id="gh-repo" placeholder="gebruikersnaam/repo-naam" />
@@ -2381,7 +2632,8 @@
         <div style="margin-top: 8px;">
           <input class="glass-input" type="password" id="gh-token" placeholder="github_pat_..." />
         </div>
-        <button id="push-github-btn" class="btn-primary" style="margin-top: 10px; background: linear-gradient(135deg, #16a34a, #15803d);">
+        <button id="push-github-btn" class="btn-primary"
+          style="margin-top: 10px; background: linear-gradient(135deg, #16a34a, #15803d);">
           🚀 Publiceer <code>maandoverzichten/data.js</code> direct naar GitHub
         </button>
         <div id="gh-push-status" style="margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
@@ -2398,7 +2650,8 @@
             <img class="brand-logo-img" src="logo.png" alt="VOLVO | Rutten" />
           </div>
           <div class="card-kicker">Customer Hero Beloning • A4 Certificaat</div>
-          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--volvo-navy);">Maak Cadeaubon voor de Customer Hero</h2>
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--volvo-navy);">Maak Cadeaubon voor de Customer
+            Hero</h2>
         </div>
         <button id="close-voucher-btn" class="icon-pill-btn">✕ Sluiten</button>
       </div>
@@ -2406,7 +2659,8 @@
       <div class="voucher-studio-grid">
         <!-- Linkerkolom: Cadeau kiezen & instellingen -->
         <div>
-          <strong style="font-size: 0.92rem; color: var(--volvo-navy); display: block;">1. Kies het cadeau voor op de A4 cadeaubon</strong>
+          <strong style="font-size: 0.92rem; color: var(--volvo-navy); display: block;">1. Kies het cadeau voor op de A4
+            cadeaubon</strong>
 
           <div class="gift-choice-grid" id="gift-choice-grid">
             <!-- Optie 1: Standaard cadeau (Bol.com cadeaukaart) -->
@@ -2414,7 +2668,8 @@
               <div class="gift-choice-check">✓</div>
               <div style="font-size: 1.45rem; margin-bottom: 6px;">🛍️</div>
               <div style="font-weight: 800; font-size: 0.92rem; color: var(--volvo-navy);">Standaard cadeau</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">Bol.com cadeaukaart t.w.v. € 25,-</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">Bol.com cadeaukaart t.w.v.
+                € 25,-</div>
             </div>
 
             <!-- Optie 2: Custom cadeau invullen -->
@@ -2422,53 +2677,61 @@
               <div class="gift-choice-check">✓</div>
               <div style="font-size: 1.45rem; margin-bottom: 6px;">✨</div>
               <div style="font-weight: 800; font-size: 0.92rem; color: var(--volvo-navy);">Custom cadeau</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">Zelf een cadeau of bedrag invullen</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">Zelf een cadeau of bedrag
+                invullen</div>
             </div>
           </div>
 
           <!-- Extra invulveld bij Custom Cadeau -->
           <div id="custom-gift-box" style="display: none; margin-top: 14px;">
-            <label for="voucher-custom-gift" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--volvo-navy); margin-bottom: 6px;">
+            <label for="voucher-custom-gift"
+              style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--volvo-navy); margin-bottom: 6px;">
               Omschrijving van het custom cadeau
             </label>
-            <input
-              class="glass-input"
-              type="text"
-              id="voucher-custom-gift"
-              placeholder="Bijv. Dinerbon t.w.v. € 50,- of Autopoetspakket"
-              value=""
-            />
+            <input class="glass-input" type="text" id="voucher-custom-gift"
+              placeholder="Bijv. Dinerbon t.w.v. € 50,- of Autopoetspakket" value="" />
           </div>
 
           <!-- Gegevens van de winnaar (automatisch ingevuld, aanpasbaar indien gewenst) -->
           <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(0, 48, 87, 0.08);">
-            <strong style="font-size: 0.92rem; color: var(--volvo-navy); display: block; margin-bottom: 10px;">2. Gegevens op het A4 certificaat</strong>
+            <strong style="font-size: 0.92rem; color: var(--volvo-navy); display: block; margin-bottom: 10px;">2.
+              Gegevens op het A4 certificaat</strong>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <div>
-                <label for="voucher-winner-name" style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Naam Customer Hero</label>
+                <label for="voucher-winner-name"
+                  style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Naam
+                  Customer Hero</label>
                 <input class="glass-input" type="text" id="voucher-winner-name" />
               </div>
               <div>
-                <label for="voucher-winner-branch" style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Vestiging &amp; Maand</label>
+                <label for="voucher-winner-branch"
+                  style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Vestiging
+                  &amp; Maand</label>
                 <input class="glass-input" type="text" id="voucher-winner-branch" />
               </div>
             </div>
             <div style="margin-top: 10px;">
-              <label for="voucher-personal-note" style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Persoonlijke felicitatie / klantcompliment op A4</label>
+              <label for="voucher-personal-note"
+                style="display: block; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Persoonlijke
+                felicitatie / klantcompliment op A4</label>
               <textarea class="glass-textarea" rows="2" id="voucher-personal-note"></textarea>
             </div>
           </div>
 
-          <button type="button" id="download-voucher-pdf-btn" class="btn-primary" style="margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button type="button" id="download-voucher-pdf-btn" class="btn-primary"
+            style="margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <span>⬇️</span>
             <span>Genereer &amp; Download A4 PDF</span>
           </button>
-          <div id="voucher-download-status" style="margin-top: 8px; font-size: 0.82rem; font-weight: 600; color: var(--green); text-align: center;"></div>
+          <div id="voucher-download-status"
+            style="margin-top: 8px; font-size: 0.82rem; font-weight: 600; color: var(--green); text-align: center;">
+          </div>
         </div>
 
         <!-- Rechterkolom: Live A4 Preview -->
         <div class="a4-preview-wrap">
-          <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px;">
+          <div
+            style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px;">
             Live A4 Voorbeeld (210 × 297 mm)
           </div>
           <canvas id="voucher-preview-canvas" width="1654" height="2339"></canvas>
@@ -3524,10 +3787,10 @@ ${reviewLines || "(Nog geen slechte reviews geladen voor deze maand)"}`;
       const focusLines = tipBodyRaw
         ? tipBodyRaw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
         : [
-            "**Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie volledig in de werkorder.",
-            "**Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af met de klant.",
-            "**Houd de klant op de hoogte** van de voortgang. Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten."
-          ];
+          "**Zorg voor een duidelijke werkorder.** Stel bij het maken van de afspraak de juiste vragen en noteer alle relevante informatie volledig in de werkorder.",
+          "**Geef de klant een zo nauwkeurig mogelijke prijsopgave.** Licht toe dat diagnose tijd én geld kost, en stem extra onderzoek altijd vooraf af met de klant.",
+          "**Houd de klant op de hoogte** van de voortgang. Informeer de klant bij vertraging, extra werkzaamheden of aanvullende kosten."
+        ];
 
       const subject = `📊 Nieuw Maandoverzicht One Voice Klanttevredenheid — ${mLabel} (Volvo Rutten)`;
 
@@ -3548,7 +3811,7 @@ ${reviewLines || "(Nog geen slechte reviews geladen voor deze maand)"}`;
         return `
         <tr bgcolor="${rowBg}" style="background-color:${rowBg};">
           <td bgcolor="${rowBg}" style="background-color:${rowBg};padding:10px 12px;border-bottom:1px solid #e2e8f0;font-family:'Segoe UI',Arial,sans-serif;font-weight:${b.isTotal ? "800" : "600"};color:#003057;font-size:13px;">
-            <font color="#003057">${ b.isTotal ? `<strong>${escapeEmailHtml(b.label)}</strong>` : escapeEmailHtml(b.label) }</font>
+            <font color="#003057">${b.isTotal ? `<strong>${escapeEmailHtml(b.label)}</strong>` : escapeEmailHtml(b.label)}</font>
           </td>
           <td bgcolor="${rowBg}" align="center" style="background-color:${rowBg};padding:8px 6px;border-bottom:1px solid #e2e8f0;">
             ${renderEmailChip(b.osat, 67)}
@@ -3845,7 +4108,7 @@ Customer Champion • Volvo Rutten`;
         const orig = btn.innerHTML;
         btn.innerHTML = "✅ Gekopieerd!";
         setTimeout(() => { btn.innerHTML = orig; }, 2200);
-      } catch (_) {}
+      } catch (_) { }
     });
 
     // Kopieer opgemaakte HTML e-mail (zodat plakken in Outlook / Gmail / Apple Mail de volledige dashboard-stijl behoudt)
@@ -3893,7 +4156,7 @@ Customer Champion • Volvo Rutten`;
         btn.innerHTML = "✅ Platte tekst gekopieerd!";
         statusEl.textContent = "✅ Platte tekstversie van de directie-mail is gekopieerd naar je klembord.";
         setTimeout(() => { btn.innerHTML = orig; }, 2600);
-      } catch (_) {}
+      } catch (_) { }
     });
 
     // Download-knop voor ANONIEME slechte reviews + klaargezette AI-prompt in 1 tekstbestand
@@ -4066,9 +4329,30 @@ Customer Champion • Volvo Rutten`;
             return;
           }
 
-          appData.responses = parsed;
-          const uniqueMonths = Array.from(new Set(parsed.map(p => p.month))).sort().reverse();
-          appData.latestMonth = uniqueMonths[0];
+          // Slim samenvoegen op Enquête ID (voorkomt dubbeltellingen én behoudt eerdere maanden)
+          const mergedMap = new Map();
+          (appData.responses || []).forEach(existing => {
+            const key = existing.id
+              ? `id:${existing.id}`
+              : `fb:${existing.date}|${existing.branch}|${existing.pst}|${existing.osat}|${existing.comment}`;
+            mergedMap.set(key, existing);
+          });
+
+          let addedCount = 0;
+          let updatedCount = 0;
+          parsed.forEach(item => {
+            const key = item.id
+              ? `id:${item.id}`
+              : `fb:${item.date}|${item.branch}|${item.pst}|${item.osat}|${item.comment}`;
+            if (mergedMap.has(key)) updatedCount++;
+            else addedCount++;
+            mergedMap.set(key, item);
+          });
+
+          appData.responses = Array.from(mergedMap.values()).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+          const allUniqueMonths = getAvailableMonths();
+          const uploadedMonths = Array.from(new Set(parsed.map(p => p.month))).sort().reverse();
+          appData.latestMonth = uploadedMonths[0] || allUniqueMonths[0];
           currentMonth = appData.latestMonth;
 
           populateMonthSelectors();
@@ -4076,7 +4360,7 @@ Customer Champion • Volvo Rutten`;
 
           const badCount = getAnonymousBadReviewsForMonth(appData.latestMonth).length;
           document.getElementById("upload-parse-status").style.color = "var(--green)";
-          document.getElementById("upload-parse-status").textContent = `✅ ${parsed.length} Service-reacties succesvol verwerkt (${uniqueMonths.length} maanden, nieuwste: ${formatMonthLabel(appData.latestMonth)} • ${badCount} anonieme leermomenten klaar bij Stap 3).`;
+          document.getElementById("upload-parse-status").textContent = `✅ ${parsed.length} reacties ingelezen (${addedCount} nieuw, ${updatedCount} bijgewerkt • totaal ${appData.responses.length} reacties over ${allUniqueMonths.length} maanden • nieuwste: ${formatMonthLabel(appData.latestMonth)} • ${badCount} leermomenten klaar bij Stap 3).`;
         } catch (err) {
           console.error(err);
           document.getElementById("upload-parse-status").style.color = "var(--red)";
@@ -4690,4 +4974,5 @@ Customer Champion • Volvo Rutten`;
     checkAuth();
   </script>
 </body>
+
 </html>
